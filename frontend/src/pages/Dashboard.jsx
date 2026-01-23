@@ -10,8 +10,19 @@ import InventoryDashboard from './dashboards/InventoryDashboard';
 import ExecutiveDashboard from './dashboards/ExecutiveDashboard';
 
 const Dashboard = () => {
-  const { getRole } = useAuth();
-  const role = getRole();
+  const { role, loading } = useAuth();
+
+  // Show loading state while fetching role
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <div className="text-center">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-black"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Map role to dashboard component
   const dashboardComponents = {

@@ -3,15 +3,14 @@ import { useAuth } from '../../context/AuthContext';
 import MetricCard from '../../components/MetricCard';
 
 const AdminDashboard = () => {
-  const { getUser } = useAuth();
-  const user = getUser();
+  const { user } = useAuth();
 
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-black mb-2">
-          Welcome, {user?.name}
+          Welcome, {user?.full_name}
         </h1>
         <p className="text-gray-600 text-lg">
           System Overview & Administration Dashboard
@@ -24,28 +23,28 @@ const AdminDashboard = () => {
           title="Total Users"
           value="1,234"
           trend="12%"
-          icon="👥"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Active Branches"
           value="28"
           trend="5%"
-          icon="🏢"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="System Uptime"
           value="99.9%"
           trend="0.1%"
-          icon="✓"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Audit Logs"
           value="45.2K"
           trend="8.5%"
-          icon="📋"
+          icon=""
           isPositive={true}
         />
       </div>
@@ -56,28 +55,28 @@ const AdminDashboard = () => {
           title="Failed Logins"
           value="12"
           trend="3%"
-          icon="⚠️"
+          icon=""
           isPositive={false}
         />
         <MetricCard
           title="Pending Approvals"
           value="8"
           trend="2"
-          icon="📝"
+          icon=""
           isPositive={false}
         />
         <MetricCard
           title="API Requests"
           value="2.5M"
           trend="15%"
-          icon="🔌"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Database Size"
           value="425GB"
           trend="7%"
-          icon="💾"
+          icon=""
           isPositive={false}
         />
       </div>

@@ -66,12 +66,10 @@ const menuConfig = {
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  const { getRole, getUser, logout } = useAuth();
+  const { role, user, logout } = useAuth();
   const { isOpen, setIsOpen } = useDataStore();
   const [activeMenu, setActiveMenu] = useState('Overview');
 
-  const role = getRole();
-  const user = getUser();
   const roleMenuItems = menuConfig[role] || [];
 
   const handleLogout = () => {
@@ -101,7 +99,7 @@ const Sidebar = () => {
                   {user.avatar}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate">{user.name}</p>
+                  <p className="text-sm font-semibold truncate">{user.full_name}</p>
                   <p className="text-xs text-gray-400 capitalize truncate">{role}</p>
                 </div>
               </div>

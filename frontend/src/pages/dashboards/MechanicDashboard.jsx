@@ -2,20 +2,15 @@ import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import MetricCard from '../../components/MetricCard';
 
-/**
- * Mechanic Dashboard
- * Personal job assignments, job status, and parts tracking
- */
 const MechanicDashboard = () => {
-  const { getUser } = useAuth();
-  const user = getUser();
+  const { user } = useAuth();
 
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-black mb-2">
-          Welcome, {user?.name}
+          Welcome, {user?.full_name}
         </h1>
         <p className="text-gray-600 text-lg">
           Mechanic Work Dashboard
@@ -28,28 +23,28 @@ const MechanicDashboard = () => {
           title="Jobs Assigned"
           value="12"
           trend="3"
-          icon="🔧"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Jobs Completed Today"
           value="4"
           trend="2"
-          icon="✓"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="In Progress"
           value="3"
           trend="1"
-          icon="⏱️"
+          icon=""
           isPositive={false}
         />
         <MetricCard
           title="Hours Logged"
           value="32.5"
           trend="4.5"
-          icon="⏰"
+          icon=""
           isPositive={true}
         />
       </div>
@@ -60,28 +55,28 @@ const MechanicDashboard = () => {
           title="Parts Used Today"
           value="18"
           trend="6"
-          icon="🔩"
+          icon=""
           isPositive={false}
         />
         <MetricCard
           title="Quality Score"
           value="9.2/10"
           trend="0.3"
-          icon="⭐"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Avg Job Time"
           value="2.5 hrs"
           trend="0.2 hrs"
-          icon="⏳"
+          icon=""
           isPositive={false}
         />
         <MetricCard
           title="Tools Assigned"
           value="15"
           trend="2"
-          icon="🛠️"
+          icon=""
           isPositive={true}
         />
       </div>

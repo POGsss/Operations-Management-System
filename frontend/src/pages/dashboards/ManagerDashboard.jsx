@@ -2,20 +2,15 @@ import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import MetricCard from '../../components/MetricCard';
 
-/**
- * Branch Manager Dashboard
- * Overview of branch operations, jobs, inventory, and sales
- */
 const ManagerDashboard = () => {
-  const { getUser } = useAuth();
-  const user = getUser();
+  const { user } = useAuth();
 
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-black mb-2">
-          Welcome, {user?.name}
+          Welcome, {user?.full_name}
         </h1>
         <p className="text-gray-600 text-lg">
           Branch Operations Dashboard
@@ -28,28 +23,28 @@ const ManagerDashboard = () => {
           title="Total Job Orders"
           value="342"
           trend="8%"
-          icon="📝"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Completed Jobs"
           value="287"
           trend="12%"
-          icon="✓"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Pending Jobs"
           value="55"
           trend="3%"
-          icon="⏱️"
+          icon=""
           isPositive={false}
         />
         <MetricCard
           title="This Week Sales"
           value="$24,500"
           trend="15%"
-          icon="💵"
+          icon=""
           isPositive={true}
         />
       </div>
@@ -60,28 +55,28 @@ const ManagerDashboard = () => {
           title="Inventory Items"
           value="1,245"
           trend="5%"
-          icon="📦"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Low Stock Items"
           value="28"
           trend="2"
-          icon="⚠️"
+          icon=""
           isPositive={false}
         />
         <MetricCard
           title="Staff Count"
           value="42"
           trend="2"
-          icon="👥"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Avg Job Time"
           value="4.2 hrs"
           trend="0.5 hrs"
-          icon="⏱️"
+          icon=""
           isPositive={false}
         />
       </div>

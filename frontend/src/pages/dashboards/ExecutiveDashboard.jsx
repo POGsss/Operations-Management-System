@@ -2,20 +2,15 @@ import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import MetricCard from '../../components/MetricCard';
 
-/**
- * Executive Dashboard
- * High-level business analytics and performance metrics
- */
 const ExecutiveDashboard = () => {
-  const { getUser } = useAuth();
-  const user = getUser();
+  const { user } = useAuth();
 
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-black mb-2">
-          Welcome, {user?.name}
+          Welcome, {user?.full_name}
         </h1>
         <p className="text-gray-600 text-lg">
           Executive Business Dashboard
@@ -28,28 +23,28 @@ const ExecutiveDashboard = () => {
           title="Total Revenue"
           value="$2.4M"
           trend="18%"
-          icon="💰"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Net Profit"
           value="$485K"
           trend="22%"
-          icon="📈"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="YoY Growth"
           value="24%"
           trend="6%"
-          icon="📊"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Market Share"
           value="12.5%"
           trend="2.3%"
-          icon="🎯"
+          icon=""
           isPositive={true}
         />
       </div>
@@ -60,28 +55,28 @@ const ExecutiveDashboard = () => {
           title="Customer Base"
           value="3,240"
           trend="15%"
-          icon="👥"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Employee Count"
           value="342"
           trend="8%"
-          icon="👔"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Branches"
           value="28"
           trend="3"
-          icon="🏢"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Operational Cost"
           value="$1.2M"
           trend="3%"
-          icon="⚙️"
+          icon=""
           isPositive={false}
         />
       </div>

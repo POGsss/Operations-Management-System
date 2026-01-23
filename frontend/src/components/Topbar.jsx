@@ -3,12 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import useDataStore from '../store/UseDataStore';
 
 const Topbar = () => {
-  const { getUser, getRole } = useAuth();
+  const { user, role } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const { isOpen, setIsOpen } = useDataStore();
-
-  const user = getUser();
-  const role = getRole();
 
   const getRoleDisplayName = (roleValue) => {
     const roleMap = {

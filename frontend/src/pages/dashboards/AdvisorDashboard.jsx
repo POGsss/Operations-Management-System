@@ -2,20 +2,15 @@ import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import MetricCard from '../../components/MetricCard';
 
-/**
- * Service Advisor Dashboard
- * Customer management, job orders, estimates, and billing
- */
 const AdvisorDashboard = () => {
-  const { getUser } = useAuth();
-  const user = getUser();
+  const { user } = useAuth();
 
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-black mb-2">
-          Welcome, {user?.name}
+          Welcome, {user?.full_name}
         </h1>
         <p className="text-gray-600 text-lg">
           Service Advisor Dashboard
@@ -28,28 +23,28 @@ const AdvisorDashboard = () => {
           title="Total Customers"
           value="156"
           trend="8%"
-          icon="👤"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Active Estimates"
           value="34"
           trend="5%"
-          icon="📄"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Pending Approvals"
           value="12"
           trend="2"
-          icon="⏳"
+          icon=""
           isPositive={false}
         />
         <MetricCard
           title="This Month Revenue"
           value="$18,200"
           trend="10%"
-          icon="💰"
+          icon=""
           isPositive={true}
         />
       </div>
@@ -60,28 +55,28 @@ const AdvisorDashboard = () => {
           title="Billable Hours"
           value="256"
           trend="12%"
-          icon="⏱️"
+          icon="⏱"
           isPositive={true}
         />
         <MetricCard
           title="Outstanding Invoices"
           value="$5,430"
           trend="3"
-          icon="💳"
+          icon=""
           isPositive={false}
         />
         <MetricCard
           title="Customer Satisfaction"
           value="4.7/5"
           trend="0.2"
-          icon="⭐"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Repeat Customers"
           value="68%"
           trend="4%"
-          icon="🔄"
+          icon=""
           isPositive={true}
         />
       </div>

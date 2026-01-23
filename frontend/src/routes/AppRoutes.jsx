@@ -23,9 +23,9 @@ const AppRoutes = () => {
             }
           />
 
-          {/* Role-based routes (optional, for future enhancement) */}
+          {/* Admin dashboard with subpages */}
           <Route
-            path="/dashboard/admin"
+            path="/dashboard/admin/:page"
             element={
               <ProtectedRoute>
                 <Dashboard />

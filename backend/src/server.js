@@ -1,8 +1,8 @@
-import app from "./app.js";
 import dotenv from "dotenv";
-import { supabase } from "./db/index.js";
-
 dotenv.config();
+
+import app from "./app.js";
+import { supabase } from "./db/index.js";
 
 const PORT = process.env.PORT || 4000;
 

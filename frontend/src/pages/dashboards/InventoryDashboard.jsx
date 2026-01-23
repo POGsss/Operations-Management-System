@@ -2,20 +2,15 @@ import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import MetricCard from '../../components/MetricCard';
 
-/**
- * Inventory Officer Dashboard
- * Stock management, purchase orders, and inventory logs
- */
 const InventoryDashboard = () => {
-  const { getUser } = useAuth();
-  const user = getUser();
+  const { user } = useAuth();
 
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-black mb-2">
-          Welcome, {user?.name}
+          Welcome, {user?.full_name}
         </h1>
         <p className="text-gray-600 text-lg">
           Inventory Management Dashboard
@@ -28,28 +23,28 @@ const InventoryDashboard = () => {
           title="Total SKUs"
           value="1,245"
           trend="8%"
-          icon="📦"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Stock Value"
           value="$234,500"
           trend="12%"
-          icon="💰"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Low Stock Items"
           value="28"
           trend="3"
-          icon="⚠️"
+          icon=""
           isPositive={false}
         />
         <MetricCard
           title="Out of Stock"
           value="5"
           trend="1"
-          icon="❌"
+          icon=""
           isPositive={false}
         />
       </div>
@@ -60,28 +55,28 @@ const InventoryDashboard = () => {
           title="Pending Orders"
           value="12"
           trend="2"
-          icon="📋"
+          icon=""
           isPositive={false}
         />
         <MetricCard
           title="Order Value (Pending)"
           value="$45,600"
           trend="5.2%"
-          icon="💵"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Inventory Turnover"
           value="3.4x"
           trend="0.2x"
-          icon="🔄"
+          icon=""
           isPositive={true}
         />
         <MetricCard
           title="Warehouses"
           value="4"
           trend="0"
-          icon="🏭"
+          icon=""
           isPositive={true}
         />
       </div>

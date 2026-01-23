@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { EyeIcon, EyeSlashIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -27,7 +28,6 @@ const Login = () => {
     setError('');
     setLoading(true);
 
-    // Basic validation
     if (!email || !password) {
       setError('Email and password are required');
       setLoading(false);
@@ -41,19 +41,13 @@ const Login = () => {
     }
 
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Perform login
-      const success = login(email, password, selectedRole);
+      const success = await login(email, password, selectedRole);
 
       if (success) {
         navigate('/dashboard');
-      } else {
-        setError('Login failed. Please try again.');
       }
     } catch (err) {
-      setError('An error occurred during login');
+      setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
@@ -159,35 +153,13 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-gray-600 hover:text-black transition"
+                  className="absolute right-3 top-4 text-gray-600 hover:text-black transition"
                   disabled={loading}
                 >
                   {showPassword ? (
-                    <svg
-                      className="w-5 h-5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                      <path
-                        fillRule="evenodd"
-                        d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <EyeSlashIcon className="w-5 h-5" />
                   ) : (
-                    <svg
-                      className="w-5 h-5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z"
-                        clipRule="evenodd"
-                      />
-                      <path d="M15.171 13.576l1.472 1.473a1 1 0 001.414-1.414l-.002-.002A10.026 10.026 0 0020 10c-1.274-4.057-5.064-7-9.542-7a9.971 9.971 0 00-3.516.635l1.514 1.514a4 4 0 015.291 5.291l.003.003z" />
-                    </svg>
+                    <EyeIcon className="w-5 h-5" />
                   )}
                 </button>
               </div>
@@ -198,18 +170,21 @@ const Login = () => {
               <label className="block text-sm font-semibold text-black mb-2">
                 Select Role
               </label>
-              <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white"
-                disabled={loading}
-              >
-                {roles.map((role) => (
-                  <option key={role.value} value={role.value}>
-                    {role.label}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  className="appearance-none w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
+                  disabled={loading}
+                >
+                  {roles.map((role) => (
+                    <option key={role.value} value={role.value}>
+                      {role.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDownIcon className="absolute right-3 top-3.5 w-5 h-5 text-gray-600 pointer-events-none" />
+              </div>
             </div>
 
             {/* Forgot Password Link */}
