@@ -1,5 +1,5 @@
 import express from 'express';
-import { supabase } from '../db/index.js';
+import { supabase, supabaseAdmin } from '../db/index.js';
 
 const router = express.Router();
 
@@ -9,24 +9,26 @@ router.post('/register', async (req, res) => {
     const { email, password, role, fullName } = req.body;
 
     // Validate input
-    if (!email || !password || !role) {
+    if (!email || !password || !role || !fullName) {
       return res.status(400).json({
-        error: 'Email, password, and role are required'
+        error: 'Email, password, role, and full name are required'
       });
     }
 
-    // Create auth user
-    const { data: authData, error: authError } = await supabase.auth.signUpWithPassword({
+    // Create auth user using admin API
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
+      email_confirm: true, // Auto-confirm email
     });
 
     if (authError) {
+      console.error('Auth creation error:', authError.message);
       return res.status(400).json({ error: authError.message });
     }
 
     // Create user profile
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('users')
       .insert([
         {
@@ -40,6 +42,9 @@ router.post('/register', async (req, res) => {
       .single();
 
     if (error) {
+      console.error('User profile creation error:', error.message);
+      // Try to clean up the auth user if profile creation fails
+      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
       return res.status(400).json({ error: error.message });
     }
 
@@ -48,6 +53,7 @@ router.post('/register', async (req, res) => {
       message: 'User registered successfully'
     });
   } catch (error) {
+    console.error('Register error:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
@@ -145,6 +151,48 @@ router.get('/me', async (req, res) => {
     res.json({ user: userData });
   } catch (error) {
     console.error('Me endpoint error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete user endpoint
+router.delete('/delete-user/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    console.log('Deleting user:', userId);
+
+    // Delete from users table first
+    const { error: dbError } = await supabaseAdmin
+      .from('users')
+      .delete()
+      .eq('id', userId);
+
+    if (dbError) {
+      console.error('Database delete error:', dbError.message);
+      return res.status(400).json({ error: 'Failed to delete user from database: ' + dbError.message });
+    }
+
+    // Delete from auth
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+
+    if (authError) {
+      console.error('Auth delete error:', authError.message);
+      // Log the error but don't fail - user is already deleted from database
+      console.warn('Note: User deleted from database but auth deletion may have failed:', authError.message);
+    }
+
+    console.log('User deleted successfully:', userId);
+    res.json({ 
+      message: 'User deleted successfully',
+      userId: userId
+    });
+  } catch (error) {
+    console.error('Delete user error:', error.message);
     res.status(500).json({ error: error.message });
   }
 });

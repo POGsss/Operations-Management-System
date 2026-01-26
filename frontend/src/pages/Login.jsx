@@ -71,7 +71,7 @@ const Login = () => {
         {/* Content */}
         <div className="relative z-10 text-center px-8">
           <div className="mb-8">
-            <div className="inline-block bg-white bg-opacity-10 rounded-2xl p-8 backdrop-blur-sm">
+            <div className="inline-block bg-white rounded-2xl p-8 backdrop-blur-sm">
               <svg
                 className="w-24 h-24 text-white"
                 fill="none"
