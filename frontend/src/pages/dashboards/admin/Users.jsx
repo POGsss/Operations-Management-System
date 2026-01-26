@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import { HiTrash, HiPlus, HiX } from 'react-icons/hi';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 const Users = () => {
     const [users, setUsers] = useState([]);
@@ -187,7 +188,7 @@ const Users = () => {
 
             {/* Success Message */}
             {successMessage && (
-                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center justify-between">
+                <div className="bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded-lg flex items-center justify-between">
                     <p>{successMessage}</p>
                     <button
                         onClick={() => setSuccessMessage('')}
@@ -200,7 +201,7 @@ const Users = () => {
 
             {/* Error Message */}
             {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center justify-between">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg flex items-center justify-between">
                     <p>{error}</p>
                     <button
                         onClick={() => setError(null)}
@@ -226,7 +227,7 @@ const Users = () => {
                                     name="fullName"
                                     value={formData.fullName}
                                     onChange={handleInputChange}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                    className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
                                     placeholder="John Doe"
                                     required
                                 />
@@ -241,7 +242,7 @@ const Users = () => {
                                     name="email"
                                     value={formData.email}
                                     onChange={handleInputChange}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                    className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
                                     placeholder="user@example.com"
                                     required
                                 />
@@ -256,13 +257,13 @@ const Users = () => {
                                     name="password"
                                     value={formData.password}
                                     onChange={handleInputChange}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                    className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
                                     placeholder="Enter password"
                                     required
                                 />
                             </div>
 
-                            <div>
+                            <div className="relative">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Role *
                                 </label>
@@ -270,7 +271,7 @@ const Users = () => {
                                     name="role"
                                     value={formData.role}
                                     onChange={handleInputChange}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                                    className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
                                     required
                                 >
                                     {roles.map((r) => (
@@ -279,6 +280,7 @@ const Users = () => {
                                         </option>
                                     ))}
                                 </select>
+                                <ChevronDownIcon className="absolute right-3 top-10 w-5 h-5 text-gray-600 pointer-events-none" />
                             </div>
                         </div>
 
@@ -311,7 +313,7 @@ const Users = () => {
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-gray-50">
+                            <thead className="border-b border-gray-200">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
                                         Name
@@ -368,7 +370,7 @@ const Users = () => {
 
                 {/* User Count Footer */}
                 {!loading && users.length > 0 && (
-                    <div className="bg-gray-50 px-6 py-3 text-sm text-gray-600">
+                    <div className="border-t border-gray-200 px-6 py-3 text-sm text-gray-700">
                         Total users: <span className="font-semibold">{users.length}</span>
                     </div>
                 )}
