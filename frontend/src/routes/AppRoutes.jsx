@@ -23,49 +23,9 @@ const AppRoutes = () => {
             }
           />
 
-          {/* Admin dashboard with subpages */}
+          {/* Dynamic role and page routes */}
           <Route
-            path="/dashboard/admin/:page"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/manager"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/advisor"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/mechanic"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/inventory"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/executive"
+            path="/dashboard/:roleRoute/:page"
             element={
               <ProtectedRoute>
                 <Dashboard />

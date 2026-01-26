@@ -57,7 +57,7 @@ const menuConfig = {
     { name: 'Inventory Logs', icon: <HiClipboardList className="w-5 h-5" /> },
   ],
   executive: [
-    { name: 'Company Dashboard', icon: <HiTemplate className="w-5 h-5" /> },
+    { name: 'Overview', icon: <HiTemplate className="w-5 h-5" /> },
     { name: 'Sales Reports', icon: <HiChartBar className="w-5 h-5" /> },
     { name: 'Performance', icon: <HiTrendingUp className="w-5 h-5" /> },
     { name: 'Audit Logs', icon: <HiClipboardList className="w-5 h-5" /> },
@@ -80,6 +80,14 @@ const Sidebar = () => {
   const handleMenuClick = (menuName) => {
     setActiveMenu(menuName);
     setIsOpen(false);
+    
+    // Navigate to role-specific page
+    // Convert menu name to component name format (remove spaces)
+    const pageRoute = menuName.replace(/\s+/g, '');
+    const roleRoute = role.replace(/_/g, '-');
+    
+    console.log('Navigating to:', `/dashboard/${roleRoute}/${pageRoute}`);
+    navigate(`/dashboard/${roleRoute}/${pageRoute}`);
   };
 
   return (
