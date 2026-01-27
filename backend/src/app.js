@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.js';
+import branchRoutes from './routes/branches.js';
 import { verifyToken } from './middlewares/auth.js';
 
 const app = express();
@@ -15,6 +16,9 @@ app.get('/health', (req, res) => {
 
 // Auth routes (no authentication required)
 app.use('/api/auth', authRoutes);
+
+// Branch routes (authentication required)
+app.use('/api/branches', branchRoutes);
 
 // Protected route example
 app.get('/api/protected', verifyToken, (req, res) => {
