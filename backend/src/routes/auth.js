@@ -1,34 +1,82 @@
 import express from 'express';
 import { supabase, supabaseAdmin } from '../db/index.js';
+import { logAuditEvent } from '../utils/auditLog.js';
+import { verifyToken, authenticateToken } from '../middlewares/auth.js';
 
 const router = express.Router();
 
-// Register endpoint
-router.post('/register', async (req, res) => {
+// Register route - ADMIN ONLY
+router.post('/register', authenticateToken, async (req, res) => {
   try {
-    const { email, password, role, fullName } = req.body;
+    const { email, password, fullName, role } = req.body;
+    const adminId = req.user.id; // From auth middleware
 
-    // Validate input
-    if (!email || !password || !role || !fullName) {
-      return res.status(400).json({
-        error: 'Email, password, role, and full name are required'
-      });
+    if (!email || !password || !fullName || !role) {
+      return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Create auth user using admin API
+    // Check if user is admin (using admin client to bypass RLS)
+    const { data: adminUser, error: adminCheckError } = await supabaseAdmin
+      .from('users')
+      .select('role')
+      .eq('id', adminId)
+      .single();
+
+    if (adminCheckError || !adminUser) {
+      console.error('Admin check failed:', adminCheckError?.message);
+      await logAuditEvent({
+        userId: adminId,
+        action: 'CREATE',
+        entityType: 'USER',
+        entityName: email,
+        details: { role },
+        status: 'FAILED',
+        errorMessage: 'Admin profile not found',
+      });
+      return res.status(403).json({ error: 'Admin profile not found' });
+    }
+
+    if (adminUser.role !== 'admin') {
+      console.error('Only admins can create users. User role:', adminUser.role);
+      await logAuditEvent({
+        userId: adminId,
+        action: 'CREATE',
+        entityType: 'USER',
+        entityName: email,
+        details: { role, attemptedBy: adminUser.role },
+        status: 'FAILED',
+        errorMessage: `Only admins can create users. User role: ${adminUser.role}`,
+      });
+      return res.status(403).json({ error: 'Only admins can create users' });
+    }
+
+    console.log('Admin', adminId, 'creating user:', email);
+
+    // Create auth user
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
-      email_confirm: true, // Auto-confirm email
+      email_confirm: true,
     });
 
     if (authError) {
       console.error('Auth creation error:', authError.message);
+      await logAuditEvent({
+        userId: adminId,
+        action: 'CREATE',
+        entityType: 'USER',
+        entityName: email,
+        details: { role },
+        status: 'FAILED',
+        errorMessage: authError.message,
+      });
       return res.status(400).json({ error: authError.message });
     }
 
+    console.log('Auth user created:', authData.user.id);
+
     // Create user profile
-    const { data, error } = await supabaseAdmin
+    const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
       .insert([
         {
@@ -36,80 +84,152 @@ router.post('/register', async (req, res) => {
           email,
           full_name: fullName,
           role,
-        }
+        },
       ])
       .select()
       .single();
 
-    if (error) {
-      console.error('User profile creation error:', error.message);
-      // Try to clean up the auth user if profile creation fails
+    if (userError) {
+      console.error('User profile creation error:', userError.message);
+      // Rollback: delete auth user if profile creation fails
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-      return res.status(400).json({ error: error.message });
+      await logAuditEvent({
+        userId: adminId,
+        action: 'CREATE',
+        entityType: 'USER',
+        entityName: email,
+        details: { role },
+        status: 'FAILED',
+        errorMessage: userError.message,
+      });
+      return res.status(400).json({ error: 'Failed to create user profile: ' + userError.message });
     }
 
+    console.log('User profile created:', userData.id);
+
+    // Log the user creation event - SUCCESS
+    await logAuditEvent({
+      userId: adminId,
+      action: 'CREATE',
+      entityType: 'USER',
+      entityId: authData.user.id,
+      entityName: email,
+      details: {
+        email,
+        fullName,
+        role,
+        createdBy: adminId,
+        createdAt: new Date().toISOString(),
+      },
+      status: 'SUCCESS',
+    });
+
+    console.log('User created successfully and logged');
+
     res.status(201).json({
-      user: data,
-      message: 'User registered successfully'
+      message: 'User created successfully',
+      user: userData,
     });
   } catch (error) {
-    console.error('Register error:', error.message);
-    res.status(500).json({ error: error.message });
+    console.error('Register error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Login endpoint
+// Login route
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({
-        error: 'Email and password are required'
-      });
+      return res.status(400).json({ error: 'Email and password required' });
     }
 
-    console.log('Login attempt:', email);
-
     // Authenticate with Supabase
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
-      console.error('Auth error:', error.message);
-      return res.status(401).json({ error: error.message });
+    if (authError) {
+      // Log failed login attempt
+      await logAuditEvent({
+        userId: null,
+        action: 'LOGIN',
+        entityType: 'AUTHENTICATION',
+        entityName: email,
+        details: {
+          email,
+          role,
+          attemptedAt: new Date().toISOString(),
+        },
+        status: 'FAILED',
+        errorMessage: authError.message,
+      });
+
+      return res.status(401).json({ error: authError.message });
     }
 
-    console.log('Auth successful, user ID:', data.user.id);
+    const userId = data.user.id;
 
-    // Get user profile
-    const { data: userData, error: userError } = await supabase
+    // Fetch user profile
+    const { data: userProfile, error: profileError } = await supabase
       .from('users')
       .select('*')
-      .eq('id', data.user.id)
+      .eq('id', userId)
       .single();
 
-    if (userError) {
-      console.error('User profile error:', userError.message);
-      return res.status(400).json({ error: userError.message });
+    if (profileError || !userProfile) {
+      // Log failed login due to missing profile
+      await logAuditEvent({
+        userId,
+        action: 'LOGIN',
+        entityType: 'AUTHENTICATION',
+        entityName: email,
+        details: {
+          email,
+          role,
+          attemptedAt: new Date().toISOString(),
+        },
+        status: 'FAILED',
+        errorMessage: 'User profile not found',
+      });
+
+      return res.status(401).json({ error: 'User profile not found' });
     }
 
-    console.log('User profile found:', userData.email, userData.role);
+    // Log successful login
+    await logAuditEvent({
+      userId,
+      action: 'LOGIN',
+      entityType: 'AUTHENTICATION',
+      entityName: email,
+      details: {
+        email,
+        role: userProfile.role,
+        loginAt: new Date().toISOString(),
+      },
+      status: 'SUCCESS',
+    });
 
     res.json({
+      message: 'Login successful',
+      user: {
+        id: userProfile.id,
+        email: userProfile.email,
+        full_name: userProfile.full_name,
+        role: userProfile.role,
+        avatar_url: userProfile.avatar_url,
+      },
       session: data.session,
-      user: userData,
-      message: 'Login successful'
     });
   } catch (error) {
-    console.error('Login error:', error.message);
-    res.status(500).json({ error: error.message });
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Logout endpoint
+// Logout route
 router.post('/logout', (req, res) => {
   res.json({ message: 'Logout successful' });
 });
@@ -155,45 +275,136 @@ router.get('/me', async (req, res) => {
   }
 });
 
-// Delete user endpoint
-router.delete('/delete-user/:userId', async (req, res) => {
+// Delete user route - ADMIN ONLY
+router.delete('/delete-user/:userId', authenticateToken, async (req, res) => {
   try {
     const { userId } = req.params;
+    const adminId = req.user.id; // From auth middleware
 
-    if (!userId) {
-      return res.status(400).json({ error: 'User ID is required' });
+    console.log('Delete request from user:', adminId, 'for user:', userId);
+
+    // Check if requester is admin (using admin client to bypass RLS)
+    const { data: requesterUser, error: requesterCheckError } = await supabaseAdmin
+      .from('users')
+      .select('role, full_name, email')
+      .eq('id', adminId)
+      .single();
+
+    if (requesterCheckError || !requesterUser) {
+      console.error('Requester check failed:', requesterCheckError?.message);
+      await logAuditEvent({
+        userId: adminId,
+        action: 'DELETE',
+        entityType: 'USER',
+        entityId: userId,
+        status: 'FAILED',
+        errorMessage: 'Requester profile not found',
+      });
+      return res.status(403).json({ error: 'Requester profile not found' });
     }
 
-    console.log('Deleting user:', userId);
+    if (requesterUser.role !== 'admin') {
+      console.error('Only admins can delete users. Requester role:', requesterUser.role);
+      await logAuditEvent({
+        userId: adminId,
+        action: 'DELETE',
+        entityType: 'USER',
+        entityId: userId,
+        status: 'FAILED',
+        errorMessage: `Only admins can delete users. Requester role: ${requesterUser.role}`,
+      });
+      return res.status(403).json({ error: 'Only admins can delete users' });
+    }
 
-    // Delete from users table first
-    const { error: dbError } = await supabaseAdmin
+    console.log('Requester is admin:', requesterUser.email);
+
+    // Fetch user to delete (using admin client to bypass RLS)
+    const { data: userToDelete, error: fetchError } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (fetchError || !userToDelete) {
+      console.error('User not found:', fetchError?.message);
+      await logAuditEvent({
+        userId: adminId,
+        action: 'DELETE',
+        entityType: 'USER',
+        entityId: userId,
+        status: 'FAILED',
+        errorMessage: 'User not found',
+      });
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    console.log('Found user to delete:', userToDelete.email);
+
+    // Delete from users table using service role
+    const { error: deleteError } = await supabaseAdmin
       .from('users')
       .delete()
       .eq('id', userId);
 
-    if (dbError) {
-      console.error('Database delete error:', dbError.message);
-      return res.status(400).json({ error: 'Failed to delete user from database: ' + dbError.message });
+    if (deleteError) {
+      console.error('Delete error:', deleteError.message);
+      // Log failed deletion
+      await logAuditEvent({
+        userId: adminId,
+        action: 'DELETE',
+        entityType: 'USER',
+        entityId: userId,
+        entityName: userToDelete.full_name,
+        details: {
+          email: userToDelete.email,
+          role: userToDelete.role,
+          deletedBy: adminId,
+          deletedByEmail: requesterUser.email,
+        },
+        status: 'FAILED',
+        errorMessage: deleteError.message,
+      });
+
+      return res.status(400).json({ error: deleteError.message });
     }
 
-    // Delete from auth
-    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    console.log('User deleted from database:', userId);
 
-    if (authError) {
-      console.error('Auth delete error:', authError.message);
-      // Log the error but don't fail - user is already deleted from database
-      console.warn('Note: User deleted from database but auth deletion may have failed:', authError.message);
-    }
+    // Delete from Supabase Auth using service role
+    await supabaseAdmin.auth.admin.deleteUser(userId);
 
-    console.log('User deleted successfully:', userId);
-    res.json({ 
+    console.log('User deleted from auth:', userId);
+
+    // Log successful deletion
+    await logAuditEvent({
+      userId: adminId,
+      action: 'DELETE',
+      entityType: 'USER',
+      entityId: userId,
+      entityName: userToDelete.full_name,
+      details: {
+        email: userToDelete.email,
+        role: userToDelete.role,
+        deletedBy: adminId,
+        deletedByEmail: requesterUser.email,
+        deletedAt: new Date().toISOString(),
+      },
+      status: 'SUCCESS',
+    });
+
+    console.log('Deletion logged successfully');
+
+    res.json({
       message: 'User deleted successfully',
-      userId: userId
+      deletedUser: {
+        id: userId,
+        email: userToDelete.email,
+        fullName: userToDelete.full_name,
+      },
     });
   } catch (error) {
-    console.error('Delete user error:', error.message);
-    res.status(500).json({ error: error.message });
+    console.error('Delete user error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

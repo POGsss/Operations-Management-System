@@ -8,6 +8,7 @@ const Users = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showAddForm, setShowAddForm] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState(null);
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -30,8 +31,20 @@ const Users = () => {
 
     // Fetch users from database
     useEffect(() => {
+        getCurrentUser();
         fetchUsers();
     }, []);
+
+    const getCurrentUser = async () => {
+        try {
+            const { data, error } = await supabase.auth.getUser();
+            if (!error && data?.user) {
+                setCurrentUserId(data.user.id);
+            }
+        } catch (err) {
+            console.error('Error getting current user:', err);
+        }
+    };
 
     const fetchUsers = async () => {
         try {
@@ -79,12 +92,22 @@ const Users = () => {
                 return;
             }
 
-            // Call backend register endpoint
+            // Get current session token
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            
+            if (sessionError || !session?.access_token) {
+                setError('Authentication required. Please log in again.');
+                setSubmitting(false);
+                return;
+            }
+
+            // Call backend register endpoint with Bearer token
             const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
             const response = await fetch(`${backendUrl}/api/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`,
                 },
                 body: JSON.stringify({
                     email: formData.email,
@@ -134,13 +157,25 @@ const Users = () => {
         try {
             setError(null);
 
-            // Call backend delete endpoint
+            // Get current session token
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            
+            if (sessionError || !session?.access_token) {
+                setError('Authentication required. Please log in again.');
+                return;
+            }
+
+            // Call backend delete endpoint with Bearer token
             const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
             const response = await fetch(`${backendUrl}/api/auth/delete-user/${userId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`,
                 },
+                body: JSON.stringify({
+                    adminId: currentUserId, // Pass the current user's ID
+                }),
             });
 
             const data = await response.json();
@@ -227,7 +262,7 @@ const Users = () => {
                                     name="fullName"
                                     value={formData.fullName}
                                     onChange={handleInputChange}
-                                    className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
                                     placeholder="John Doe"
                                     required
                                 />
@@ -242,7 +277,7 @@ const Users = () => {
                                     name="email"
                                     value={formData.email}
                                     onChange={handleInputChange}
-                                    className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
                                     placeholder="user@example.com"
                                     required
                                 />
@@ -257,7 +292,7 @@ const Users = () => {
                                     name="password"
                                     value={formData.password}
                                     onChange={handleInputChange}
-                                    className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
                                     placeholder="Enter password"
                                     required
                                 />
@@ -305,7 +340,7 @@ const Users = () => {
             )}
 
             {/* Users List */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="bg-white w-full rounded-lg shadow overflow-hidden">
                 {loading ? (
                     <div className="p-6 text-center text-gray-600">Loading users...</div>
                 ) : users.length === 0 ? (
