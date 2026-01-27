@@ -298,6 +298,45 @@ router.get('/me', async (req, res) => {
   }
 });
 
+// List users - ADMIN ONLY (optionally filtered by role)
+router.get('/users', authenticateToken, async (req, res) => {
+  try {
+    const adminId = req.user.id;
+    const { role } = req.query;
+
+    // Check if requester is admin
+    const { data: adminUser, error: adminCheckError } = await supabaseAdmin
+      .from('users')
+      .select('role')
+      .eq('id', adminId)
+      .single();
+
+    if (adminCheckError || !adminUser || adminUser.role !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can list users' });
+    }
+
+    let query = supabaseAdmin
+      .from('users')
+      .select('id, full_name, email, role')
+      .order('full_name', { ascending: true });
+
+    if (role) {
+      query = query.eq('role', role);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      throw error;
+    }
+
+    res.json({ users: data });
+  } catch (error) {
+    console.error('List users error:', error);
+    res.status(500).json({ error: error?.message || 'Failed to list users' });
+  }
+});
+
 // Delete user route - ADMIN ONLY
 router.delete('/delete-user/:userId', authenticateToken, async (req, res) => {
   try {

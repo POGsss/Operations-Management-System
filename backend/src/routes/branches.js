@@ -43,7 +43,16 @@ router.get('/:id', authenticateToken, async (req, res) => {
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const { id: adminId } = req.user;
-    const { name, code, city, manager, status } = req.body;
+    const {
+      name,
+      code,
+      city,
+      address,
+      contact_email,
+      contact_phone,
+      managerId,
+      status,
+    } = req.body;
 
     // Check if user is admin
     const { data: adminUser, error: adminCheckError } = await supabaseAdmin
@@ -71,8 +80,12 @@ router.post('/', authenticateToken, async (req, res) => {
           name,
           code,
           city,
-          manager,
+          address,
+          contact_email,
+          contact_phone,
+          manager_id: managerId || null,
           status: status || 'active',
+          created_by: adminId,
         },
       ])
       .select()
@@ -90,7 +103,7 @@ router.post('/', authenticateToken, async (req, res) => {
       details: {
         code,
         city,
-        manager,
+        manager_id: managerId || null,
         status,
       },
       status: 'SUCCESS',
@@ -98,8 +111,10 @@ router.post('/', authenticateToken, async (req, res) => {
 
     res.status(201).json({ branch: data });
   } catch (err) {
-    console.error('Create branch error:', err.message);
-    res.status(500).json({ error: 'Failed to create branch' });
+    console.error('Create branch error:', err);
+    res.status(500).json({
+      error: err?.message || 'Failed to create branch',
+    });
   }
 });
 
@@ -119,7 +134,14 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Admin access required' });
     }
 
-    const updates = req.body;
+    const { managerId, ...rest } = req.body;
+
+    const updates = { ...rest };
+
+    // Map managerId (from frontend) -> manager_id (DB foreign key)
+    if (managerId !== undefined) {
+      updates.manager_id = managerId || null;
+    }
 
     const { data, error } = await supabaseAdmin
       .from('branches')
@@ -143,8 +165,10 @@ router.put('/:id', authenticateToken, async (req, res) => {
 
     res.json({ branch: data });
   } catch (err) {
-    console.error('Update branch error:', err.message);
-    res.status(500).json({ error: 'Failed to update branch' });
+    console.error('Update branch error:', err);
+    res.status(500).json({
+      error: err?.message || 'Failed to update branch',
+    });
   }
 });
 
@@ -191,8 +215,10 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 
     res.json({ message: 'Branch deleted successfully' });
   } catch (err) {
-    console.error('Delete branch error:', err.message);
-    res.status(500).json({ error: 'Failed to delete branch' });
+    console.error('Delete branch error:', err);
+    res.status(500).json({
+      error: err?.message || 'Failed to delete branch',
+    });
   }
 });
 

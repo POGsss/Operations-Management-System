@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import MetricCard from '../../../components/MetricCard';
-import { HiChevronDown, HiX, HiSearch, HiRefresh } from 'react-icons/hi';
+import { HiChevronDown, HiX, HiSearch, HiPlus } from 'react-icons/hi';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL + '/api';
@@ -14,6 +14,21 @@ const Branches = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedBranch, setExpandedBranch] = useState(null);
+  const [managers, setManagers] = useState([]);
+  const [managersLoading, setManagersLoading] = useState(false);
+
+  // Modal + form state for add / edit
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBranch, setEditingBranch] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    code: '',
+    city: '',
+    managerId: '',
+    status: 'active',
+  });
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -56,8 +71,40 @@ const Branches = () => {
   useEffect(() => {
     if (session?.access_token) {
       fetchBranches();
+      if (isAdmin) {
+        fetchManagers();
+      }
     }
-  }, [session]);
+  }, [session, isAdmin]);
+
+  const fetchManagers = async () => {
+    if (!isAdmin) return;
+
+    try {
+      setManagersLoading(true);
+      const res = await fetch(
+        `${API_URL}/auth/users?role=branch_manager`,
+        {
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+        },
+      );
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to load managers');
+      }
+
+      const data = await res.json();
+      setManagers(data.users || []);
+    } catch (err) {
+      console.error('Fetch managers error:', err);
+      // Keep this non-fatal; just log and continue
+    } finally {
+      setManagersLoading(false);
+    }
+  };
 
   // Get unique cities for filter
   const cities = useMemo(() => {
@@ -72,14 +119,28 @@ const Branches = () => {
     return { total, active, inactive };
   }, [branches]);
 
+  // Map of manager_id -> manager user
+  const managerMap = useMemo(() => {
+    const map = new Map();
+    managers.forEach((user) => {
+      if (user?.id) {
+        map.set(user.id, user);
+      }
+    });
+    return map;
+  }, [managers]);
+
   // Filter branches
   const filteredBranches = useMemo(() => {
     return branches.filter(branch => {
+      const managerUser = managerMap.get(branch.manager_id);
+      const managerName = managerUser?.full_name || '';
+
       const matchesSearch =
         branch.name.toLowerCase().includes(filters.search.toLowerCase()) ||
         branch.code.toLowerCase().includes(filters.search.toLowerCase()) ||
         branch.city.toLowerCase().includes(filters.search.toLowerCase()) ||
-        (branch.manager || '').toLowerCase().includes(filters.search.toLowerCase());
+        managerName.toLowerCase().includes(filters.search.toLowerCase());
 
       const matchesStatus =
         filters.status === 'all' || branch.status === filters.status;
@@ -89,7 +150,7 @@ const Branches = () => {
 
       return matchesSearch && matchesStatus && matchesCity;
     });
-  }, [branches, filters]);
+  }, [branches, filters, managerMap]);
 
   // Pagination
   const totalPages = Math.ceil(filteredBranches.length / itemsPerPage);
@@ -120,6 +181,113 @@ const Branches = () => {
     });
   };
 
+  // Modal helpers
+  const openAddModal = () => {
+    setEditingBranch(null);
+    setFormData({
+      name: '',
+      code: '',
+      city: '',
+      managerId: '',
+      status: 'active',
+    });
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (branch) => {
+    setEditingBranch(branch);
+    setFormData({
+      name: branch.name || '',
+      code: branch.code || '',
+      city: branch.city || '',
+      managerId: branch.manager_id || '',
+      status: branch.status || 'active',
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSaveBranch = async (e) => {
+    e.preventDefault();
+    if (!isAdmin) return;
+
+    try {
+      setSaving(true);
+      setError(null);
+
+      const url = editingBranch
+        ? `${API_URL}/branches/${editingBranch.id}`
+        : `${API_URL}/branches`;
+
+      const method = editingBranch ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to save branch');
+      }
+
+      await fetchBranches();
+      setIsModalOpen(false);
+      setEditingBranch(null);
+    } catch (err) {
+      console.error('Save branch error:', err);
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteBranch = async (branch) => {
+    if (!isAdmin) return;
+    const confirmed = window.confirm(
+      `Are you sure you want to delete branch "${branch.name}"?`,
+    );
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(branch.id);
+      setError(null);
+
+      const res = await fetch(`${API_URL}/branches/${branch.id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to delete branch');
+      }
+
+      setBranches((prev) => prev.filter((b) => b.id !== branch.id));
+      if (expandedBranch === branch.id) {
+        setExpandedBranch(null);
+      }
+    } catch (err) {
+      console.error('Delete branch error:', err);
+      setError(err.message);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const getStatusColor = (status) => {
     return status === 'active'
       ? 'bg-green-100 text-green-800'
@@ -145,13 +313,15 @@ const Branches = () => {
             <h1 className="text-3xl font-bold text-black mb-2">Branches</h1>
             <p className="text-gray-600">Manage all branch locations and operations</p>
           </div>
-          <button
-            onClick={fetchBranches}
-            className="flex items-center space-x-2 bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition"
-          >
-            <HiRefresh className="w-5 h-5" />
-            <span>Refresh</span>
-          </button>
+          {isAdmin && (
+            <button
+              onClick={openAddModal}
+              className="flex items-center space-x-2 bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition"
+            >
+              <HiPlus className="w-5 h-5" />
+              <span>Add Branch</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -299,7 +469,10 @@ const Branches = () => {
                         {branch.city}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">
-                        {branch.manager || '—'}
+                        {(() => {
+                          const managerUser = managerMap.get(branch.manager_id);
+                          return managerUser?.full_name || '—';
+                        })()}
                       </td>
                       <td className="px-6 py-4 text-sm">
                         <span
@@ -314,10 +487,17 @@ const Branches = () => {
                         <div className="flex items-center justify-center space-x-2">
                           {isAdmin && (
                             <>
-                              <button className="px-3 py-1 text-sm text-gray-600 hover:text-black hover:bg-gray-100 rounded transition">
+                              <button
+                                onClick={() => openEditModal(branch)}
+                                className="px-3 py-1 text-sm text-gray-600 hover:text-black hover:bg-gray-100 rounded transition"
+                              >
                                 Edit
                               </button>
-                              <button className="px-3 py-1 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition">
+                              <button
+                                onClick={() => handleDeleteBranch(branch)}
+                                disabled={deletingId === branch.id}
+                                className="px-3 py-1 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
                                 Delete
                               </button>
                             </>
@@ -364,7 +544,12 @@ const Branches = () => {
                                 </div>
                                 <div>
                                   <p className="text-xs text-gray-600 font-medium">Manager</p>
-                                  <p className="text-sm text-gray-900">{branch.manager || 'Not assigned'}</p>
+                                  <p className="text-sm text-gray-900">
+                                    {(() => {
+                                      const managerUser = managerMap.get(branch.manager_id);
+                                      return managerUser?.full_name || 'Not assigned';
+                                    })()}
+                                  </p>
                                 </div>
                                 <div>
                                   <p className="text-xs text-gray-600 font-medium">Status</p>
@@ -482,6 +667,139 @@ const Branches = () => {
           </div>
         )}
       </div>
+
+      {/* Add / Edit Branch Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-black">
+                {editingBranch ? 'Edit Branch' : 'Add Branch'}
+              </h2>
+              <button
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setEditingBranch(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 transition"
+              >
+                <HiX className="w-6 h-6" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveBranch} className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Branch Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    value={formData.name}
+                    onChange={handleFormChange}
+                    placeholder="Downtown Branch"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Branch Code *
+                  </label>
+                  <input
+                    type="text"
+                    name="code"
+                    required
+                    value={formData.code}
+                    onChange={handleFormChange}
+                    placeholder="DT001"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    City *
+                  </label>
+                  <input
+                    type="text"
+                    name="city"
+                    required
+                    value={formData.city}
+                    onChange={handleFormChange}
+                    placeholder="New York"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Manager (User)
+                  </label>
+                  <select
+                    name="managerId"
+                    value={formData.managerId}
+                    onChange={handleFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+                  >
+                    <option value="">
+                      {managersLoading ? 'Loading managers...' : 'Unassigned'}
+                    </option>
+                    {managers.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.full_name} ({user.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status *
+                  </label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-4 flex justify-end space-x-3 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setEditingBranch(null);
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-4 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {saving
+                    ? editingBranch
+                      ? 'Saving...'
+                      : 'Creating...'
+                    : editingBranch
+                    ? 'Save Changes'
+                    : 'Create Branch'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
