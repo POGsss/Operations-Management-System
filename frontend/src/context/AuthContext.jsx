@@ -66,43 +66,55 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('Attempting login with:', email, 'for role:', selectedRole);
       
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      // Call backend login endpoint (which logs to audit_logs)
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+      const response = await fetch(`${backendUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          role: selectedRole,
+        }),
       });
 
-      if (error) {
-        console.error('Auth error:', error.message);
-        throw new Error(error.message);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Login error:', errorData.error);
+        throw new Error(errorData.error || 'Login failed');
       }
 
-      console.log('Auth successful, user ID:', data.user.id);
-      
-      // Fetch user profile from database
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', data.user.id)
-        .single();
+      const data = await response.json();
+      console.log('Login successful, user ID:', data.user.id);
 
-      if (userError) {
-        console.error('User profile error:', userError.message);
-        throw new Error('User profile not found');
-      }
+      const userData = data.user;
+      const sessionData = data.session;
 
       // Validate that the selected role matches the database role
       if (userData.role !== selectedRole) {
         console.error('Role mismatch:', selectedRole, 'vs', userData.role);
-        // Sign out the user since they're trying to login with wrong role
-        await supabase.auth.signOut();
         throw new Error(`You are not authorized to login as ${selectedRole}. Your role is ${userData.role}.`);
       }
+
+      // IMPORTANT: Set the session in Supabase so RLS policies work
+      if (sessionData) {
+        await supabase.auth.setSession(sessionData);
+        console.log('Supabase session set for RLS policies');
+      }
+
+      // Store session for future authenticated requests
+      setSession(sessionData);
 
       // Set user data
       setUser(userData);
       setRole(userData.role);
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('role', userData.role);
+      if (sessionData) {
+        localStorage.setItem('session', JSON.stringify(sessionData));
+      }
       
       console.log('Login successful for role:', userData.role);
       return true;

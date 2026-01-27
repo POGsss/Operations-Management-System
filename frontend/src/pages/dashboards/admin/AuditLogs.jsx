@@ -110,9 +110,11 @@ const AuditLogs = () => {
       const { data, error: fetchError, count } = await query;
 
       if (fetchError) {
+        console.error('Fetch error details:', fetchError);
         setError('Failed to fetch audit logs: ' + fetchError.message);
         console.error('Fetch error:', fetchError);
       } else {
+        console.log('Audit logs fetched successfully:', data?.length, 'records');
         setLogs(data || []);
         setPagination((prev) => ({
           ...prev,
@@ -120,6 +122,7 @@ const AuditLogs = () => {
         }));
       }
     } catch (err) {
+      console.error('Fetch exception:', err);
       setError('Error loading audit logs: ' + err.message);
       console.error('Fetch error:', err);
     } finally {
