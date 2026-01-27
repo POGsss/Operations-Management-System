@@ -152,28 +152,39 @@ router.post('/login', async (req, res) => {
     });
 
     if (authError) {
-      // Log failed login attempt
-      await logAuditEvent({
-        userId: null,
-        action: 'LOGIN',
-        entityType: 'AUTHENTICATION',
-        entityName: email,
-        details: {
-          email,
-          role,
-          attemptedAt: new Date().toISOString(),
-        },
-        status: 'FAILED',
-        errorMessage: authError.message,
-      });
+      // Log failed login attempt - use service role to bypass RLS
+      // For failed logins, we still need to log them but can't reference a user yet
+      console.log('Failed login attempt for:', email);
+      
+      const { data: auditData, error: auditError } = await supabaseAdmin
+        .from('audit_logs')
+        .insert([{
+          user_id: null, // For failed logins before user exists
+          action: 'LOGIN',
+          entity_type: 'AUTHENTICATION',
+          entity_name: email,
+          details: {
+            email,
+            role,
+            attemptedAt: new Date().toISOString(),
+          },
+          status: 'FAILED',
+          error_message: authError.message,
+          created_at: new Date().toISOString(),
+        }])
+        .select();
+
+      if (auditError) {
+        console.error('Failed to log failed login attempt:', auditError.message);
+      }
 
       return res.status(401).json({ error: authError.message });
     }
 
     const userId = data.user.id;
 
-    // Fetch user profile
-    const { data: userProfile, error: profileError } = await supabase
+    // Fetch user profile (using admin client to bypass RLS)
+    const { data: userProfile, error: profileError } = await supabaseAdmin
       .from('users')
       .select('*')
       .eq('id', userId)
@@ -181,36 +192,48 @@ router.post('/login', async (req, res) => {
 
     if (profileError || !userProfile) {
       // Log failed login due to missing profile
-      await logAuditEvent({
-        userId,
-        action: 'LOGIN',
-        entityType: 'AUTHENTICATION',
-        entityName: email,
-        details: {
-          email,
-          role,
-          attemptedAt: new Date().toISOString(),
-        },
-        status: 'FAILED',
-        errorMessage: 'User profile not found',
-      });
+      console.log('User profile not found for ID:', userId);
+      
+      await supabaseAdmin
+        .from('audit_logs')
+        .insert([{
+          user_id: userId,
+          action: 'LOGIN',
+          entity_type: 'AUTHENTICATION',
+          entity_name: email,
+          details: {
+            email,
+            role,
+            attemptedAt: new Date().toISOString(),
+          },
+          status: 'FAILED',
+          error_message: 'User profile not found',
+          created_at: new Date().toISOString(),
+        }])
+        .select();
 
       return res.status(401).json({ error: 'User profile not found' });
     }
 
     // Log successful login
-    await logAuditEvent({
-      userId,
-      action: 'LOGIN',
-      entityType: 'AUTHENTICATION',
-      entityName: email,
-      details: {
-        email,
-        role: userProfile.role,
-        loginAt: new Date().toISOString(),
-      },
-      status: 'SUCCESS',
-    });
+    await supabaseAdmin
+      .from('audit_logs')
+      .insert([{
+        user_id: userId,
+        action: 'LOGIN',
+        entity_type: 'AUTHENTICATION',
+        entity_name: email,
+        details: {
+          email,
+          role: userProfile.role,
+          loginAt: new Date().toISOString(),
+        },
+        status: 'SUCCESS',
+        created_at: new Date().toISOString(),
+      }])
+      .select();
+
+    console.log('Login successful for user:', email);
 
     res.json({
       message: 'Login successful',
