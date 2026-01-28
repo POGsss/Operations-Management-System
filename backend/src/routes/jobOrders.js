@@ -58,7 +58,7 @@ router.get('/', authenticateToken, async (req, res) => {
         branch:branches(id, name, code),
         job_assignments(
           id,
-          mechanic:users(id, full_name)
+          mechanic:users!job_assignments_mechanic_id_fkey(id, full_name)
         )
       `)
       .order('created_at', { ascending: false })

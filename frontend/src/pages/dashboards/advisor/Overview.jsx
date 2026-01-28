@@ -50,7 +50,7 @@ const Overview = () => {
           title="Billable Hours"
           value="256"
           trend="12%"
-          icon="⏱"
+          icon=""
           isPositive={true}
         />
         <MetricCard
