@@ -8,7 +8,7 @@ const router = express.Router();
 // Register route - ADMIN ONLY
 router.post('/register', authenticateToken, async (req, res) => {
   try {
-    const { email, password, fullName, role } = req.body;
+    const { email, password, fullName, role, branchId } = req.body;
     const adminId = req.user.id; // From auth middleware
 
     if (!email || !password || !fullName || !role) {
@@ -29,7 +29,7 @@ router.post('/register', authenticateToken, async (req, res) => {
         action: 'CREATE',
         entityType: 'USER',
         entityName: email,
-        details: { role },
+        details: { role, branchId },
         status: 'FAILED',
         errorMessage: 'Admin profile not found',
       });
@@ -43,7 +43,7 @@ router.post('/register', authenticateToken, async (req, res) => {
         action: 'CREATE',
         entityType: 'USER',
         entityName: email,
-        details: { role, attemptedBy: adminUser.role },
+        details: { role, branchId, attemptedBy: adminUser.role },
         status: 'FAILED',
         errorMessage: `Only admins can create users. User role: ${adminUser.role}`,
       });
@@ -66,7 +66,7 @@ router.post('/register', authenticateToken, async (req, res) => {
         action: 'CREATE',
         entityType: 'USER',
         entityName: email,
-        details: { role },
+        details: { role, branchId },
         status: 'FAILED',
         errorMessage: authError.message,
       });
@@ -76,16 +76,20 @@ router.post('/register', authenticateToken, async (req, res) => {
     console.log('Auth user created:', authData.user.id);
 
     // Create user profile
+    const profileData = {
+      id: authData.user.id,
+      email,
+      full_name: fullName,
+      role,
+    };
+
+    if (branchId) {
+      profileData.branch_id = branchId;
+    }
+
     const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
-      .insert([
-        {
-          id: authData.user.id,
-          email,
-          full_name: fullName,
-          role,
-        },
-      ])
+      .insert([profileData])
       .select()
       .single();
 
@@ -98,7 +102,7 @@ router.post('/register', authenticateToken, async (req, res) => {
         action: 'CREATE',
         entityType: 'USER',
         entityName: email,
-        details: { role },
+        details: { role, branchId },
         status: 'FAILED',
         errorMessage: userError.message,
       });
@@ -118,6 +122,7 @@ router.post('/register', authenticateToken, async (req, res) => {
         email,
         fullName,
         role,
+        branchId: branchId || null,
         createdBy: adminId,
         createdAt: new Date().toISOString(),
       },
@@ -466,6 +471,185 @@ router.delete('/delete-user/:userId', authenticateToken, async (req, res) => {
     });
   } catch (error) {
     console.error('Delete user error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update user route - ADMIN ONLY
+router.put('/update-user/:userId', authenticateToken, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { email, fullName, role, branchId, password } = req.body;
+    const adminId = req.user.id; // From auth middleware
+
+    console.log('Update request from user:', adminId, 'for user:', userId);
+
+    // Check if requester is admin
+    const { data: requesterUser, error: requesterCheckError } = await supabaseAdmin
+      .from('users')
+      .select('role, email')
+      .eq('id', adminId)
+      .single();
+
+    if (requesterCheckError || !requesterUser) {
+      console.error('Admin check failed:', requesterCheckError?.message);
+      await logAuditEvent({
+        userId: adminId,
+        action: 'UPDATE',
+        entityType: 'USER',
+        entityId: userId,
+        entityName: email,
+        details: { role, branchId },
+        status: 'FAILED',
+        errorMessage: 'Admin profile not found',
+      });
+      return res.status(403).json({ error: 'Admin profile not found' });
+    }
+
+    if (requesterUser.role !== 'admin') {
+      console.error('Only admins can update users. User role:', requesterUser.role);
+      await logAuditEvent({
+        userId: adminId,
+        action: 'UPDATE',
+        entityType: 'USER',
+        entityId: userId,
+        entityName: email,
+        details: { role, branchId, attemptedBy: requesterUser.role },
+        status: 'FAILED',
+        errorMessage: `Only admins can update users. User role: ${requesterUser.role}`,
+      });
+      return res.status(403).json({ error: 'Only admins can update users' });
+    }
+
+    // Get current user data
+    const { data: currentUser, error: currentUserError } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (currentUserError || !currentUser) {
+      console.error('User not found:', currentUserError?.message);
+      await logAuditEvent({
+        userId: adminId,
+        action: 'UPDATE',
+        entityType: 'USER',
+        entityId: userId,
+        entityName: email,
+        details: { role, branchId },
+        status: 'FAILED',
+        errorMessage: 'User not found',
+      });
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    console.log('Found user to update:', currentUser.email);
+
+    // Update user profile
+    const updateData = {
+      email: email || currentUser.email,
+      full_name: fullName || currentUser.full_name,
+      role: role || currentUser.role,
+    };
+
+    if (branchId) {
+      updateData.branch_id = branchId;
+    }
+
+    const { data: updatedUser, error: updateError } = await supabaseAdmin
+      .from('users')
+      .update(updateData)
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('User profile update error:', updateError.message);
+      await logAuditEvent({
+        userId: adminId,
+        action: 'UPDATE',
+        entityType: 'USER',
+        entityId: userId,
+        entityName: email || currentUser.email,
+        details: { role, branchId },
+        status: 'FAILED',
+        errorMessage: updateError.message,
+      });
+      return res.status(400).json({ error: updateError.message });
+    }
+
+    console.log('User profile updated:', userId);
+
+    // Update password if provided
+    if (password) {
+      const { error: passwordError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        password,
+      });
+
+      if (passwordError) {
+        console.error('Password update error:', passwordError.message);
+        await logAuditEvent({
+          userId: adminId,
+          action: 'UPDATE',
+          entityType: 'USER',
+          entityId: userId,
+          entityName: updatedUser.email,
+          details: {
+            role,
+            branchId,
+            passwordChanged: false,
+            profileUpdated: true,
+          },
+          status: 'PARTIAL_SUCCESS',
+          errorMessage: `Profile updated but password change failed: ${passwordError.message}`,
+        });
+        // Return with warning but don't fail
+      } else {
+        console.log('User password updated:', userId);
+      }
+    }
+
+    // Log successful update
+    const changesSummary = {
+      email: email && email !== currentUser.email ? { old: currentUser.email, new: email } : undefined,
+      fullName: fullName && fullName !== currentUser.full_name ? { old: currentUser.full_name, new: fullName } : undefined,
+      role: role && role !== currentUser.role ? { old: currentUser.role, new: role } : undefined,
+      branchId: branchId && branchId !== currentUser.branch_id ? { old: currentUser.branch_id, new: branchId } : undefined,
+      passwordChanged: !!password,
+    };
+
+    await logAuditEvent({
+      userId: adminId,
+      action: 'UPDATE',
+      entityType: 'USER',
+      entityId: userId,
+      entityName: updatedUser.full_name,
+      details: {
+        email: updatedUser.email,
+        changes: changesSummary,
+        updatedBy: adminId,
+        updatedByEmail: requesterUser.email,
+        updatedAt: new Date().toISOString(),
+      },
+      status: 'SUCCESS',
+    });
+
+    console.log('Update logged successfully');
+
+    res.json({
+      message: 'User updated successfully',
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        full_name: updatedUser.full_name,
+        role: updatedUser.role,
+        branch_id: updatedUser.branch_id,
+        created_at: updatedUser.created_at,
+        updated_at: updatedUser.updated_at,
+      },
+    });
+  } catch (error) {
+    console.error('Update user error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

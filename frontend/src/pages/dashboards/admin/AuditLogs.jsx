@@ -340,158 +340,172 @@ const AuditLogs = () => {
       </div>
 
       {/* Logs Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        {loading ? (
-          <div className="p-6 text-center text-gray-600">Loading audit logs...</div>
-        ) : logs.length === 0 ? (
-          <div className="p-6 text-center text-gray-600">No audit logs found</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                    Timestamp
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                    User
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                    Action
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                    Entity
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                    Entity Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">
-                    Details
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map((log) => (
-                  <React.Fragment key={log.id}>
-                    <tr className="border-b border-gray-200 last:border-none hover:bg-gray-50 transition">
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {formatDate(log.created_at)}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        {log.users ? (
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {log.users.full_name}
-                            </p>
-                            <p className="text-xs text-gray-600">{log.users.email}</p>
-                          </div>
-                        ) : (
-                          <p className="text-gray-500 italic">System</p>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
-                          {log.action}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {log.entity_type}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {log.entity_name || '-'}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
-                            log.status
-                          )}`}
-                        >
-                          {log.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <button
-                          onClick={() =>
-                            setExpandedLog(
-                              expandedLog === log.id ? null : log.id
-                            )
-                          }
-                          className="text-gray-600 hover:text-black transition"
-                        >
-                          <HiChevronDown
-                            className={`w-5 h-5 transform transition ${
-                              expandedLog === log.id ? 'rotate-180' : ''
-                            }`}
-                          />
-                        </button>
-                      </td>
-                    </tr>
+      <div className="bg-white rounded-lg shadow border border-gray-200 overflow-x-auto">
+        <table className="min-w-[1000px] w-full table-auto">
+          <thead>
+            <tr className="border-b border-gray-200">
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                Timestamp
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                User
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                Action
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                Entity
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                Entity Name
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                Status
+              </th>
+              <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">
+                Details
+              </th>
+            </tr>
+          </thead>
 
-                    {/* Expanded Details Row */}
-                    {expandedLog === log.id && (
-                      <tr className="bg-gray-50 border-b border-gray-200">
-                        <td colSpan="7" className="px-6 py-4">
-                          <div className="space-y-4">
-                            {log.details && Object.keys(log.details).length > 0 && (
-                              <div>
-                                <p className="text-sm font-semibold text-gray-700 mb-2">
-                                  Details:
-                                </p>
-                                <pre className="bg-gray-900 text-green-400 p-3 rounded text-xs overflow-auto max-h-48">
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan="7" className="px-6 py-8 text-center text-gray-600">
+                  Loading audit logs...
+                </td>
+              </tr>
+            ) : logs.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="px-6 py-8 text-center text-gray-600">
+                  No audit logs found
+                </td>
+              </tr>
+            ) : (
+              logs.map((log) => (
+                <React.Fragment key={log.id}>
+                  <tr className="border-b border-gray-200 hover:bg-gray-50 transition last:border-0">
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {formatDate(log.created_at)}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      {log.users ? (
+                        <>
+                          <p className="font-medium text-gray-900">
+                            {log.users.full_name}
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            {log.users.email}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-gray-500 italic">System</p>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                        {log.action}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {log.entity_type}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {log.entity_name || '-'}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
+                          log.status
+                        )}`}
+                      >
+                        {log.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        onClick={() =>
+                          setExpandedLog(expandedLog === log.id ? null : log.id)
+                        }
+                        className="text-gray-600 hover:text-black transition"
+                      >
+                        <HiChevronDown
+                          className={`w-5 h-5 transform transition ${expandedLog === log.id ? 'rotate-180' : ''
+                            }`}
+                        />
+                      </button>
+                    </td>
+                  </tr>
+
+                  {expandedLog === log.id && (
+                    <tr className="bg-gray-50 border-b border-gray-200">
+                      <td colSpan="7" className="px-6 py-4">
+                        <div className="space-y-4">
+                          {/* Details Section */}
+                          {log.details && (
+                            <div>
+                              <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                                Details
+                              </h4>
+                              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                <pre className="text-xs text-gray-700 whitespace-pre-wrap break-words font-mono">
                                   {JSON.stringify(log.details, null, 2)}
                                 </pre>
                               </div>
-                            )}
+                            </div>
+                          )}
 
-                            {log.error_message && (
-                              <div>
-                                <p className="text-sm font-semibold text-red-700 mb-2">
-                                  Error:
-                                </p>
-                                <p className="text-sm text-red-600 bg-red-50 p-3 rounded">
+                          {/* Error Message */}
+                          {log.error_message && (
+                            <div>
+                              <h4 className="text-sm font-semibold text-red-900 mb-2">
+                                Error Message
+                              </h4>
+                              <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+                                <p className="text-sm text-red-700">
                                   {log.error_message}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Additional Info */}
+                          <div className="grid grid-cols-2 gap-4">
+                            {log.entity_id && (
+                              <div>
+                                <h4 className="text-sm font-semibold text-gray-900 mb-1">
+                                  Entity ID
+                                </h4>
+                                <p className="text-sm text-gray-700 font-mono">
+                                  {log.entity_id}
                                 </p>
                               </div>
                             )}
 
                             {log.ip_address && (
                               <div>
-                                <p className="text-sm font-semibold text-gray-700 mb-1">
-                                  IP Address:
-                                </p>
-                                <p className="text-sm text-gray-600">
+                                <h4 className="text-sm font-semibold text-gray-900 mb-1">
+                                  IP Address
+                                </h4>
+                                <p className="text-sm text-gray-700 font-mono">
                                   {log.ip_address}
                                 </p>
                               </div>
                             )}
-
-                            {log.entity_id && (
-                              <div>
-                                <p className="text-sm font-semibold text-gray-700 mb-1">
-                                  Entity ID:
-                                </p>
-                                <p className="text-xs text-gray-600 font-mono break-all">
-                                  {log.entity_id}
-                                </p>
-                              </div>
-                            )}
                           </div>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))
+            )}
+          </tbody>
+        </table>
 
         {/* Pagination Footer */}
         {!loading && logs.length > 0 && (
-          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+          <div className="min-w-[1000px] w-full px-6 py-4 border-t border-gray-200 flex items-center justify-between">
             <div className="text-sm text-gray-600">
               Showing <span className="font-semibold">{(pagination.page - 1) * pagination.pageSize + 1}</span> to{' '}
               <span className="font-semibold">
@@ -552,11 +566,10 @@ const AuditLogs = () => {
                           page: pageNum,
                         }))
                       }
-                      className={`px-3 py-1 border rounded text-sm ${
-                        pagination.page === pageNum
+                      className={`px-3 py-1 border rounded text-sm ${pagination.page === pageNum
                           ? 'bg-black text-white border-black'
                           : 'border-gray-300 hover:bg-gray-100'
-                      }`}
+                        }`}
                     >
                       {pageNum}
                     </button>

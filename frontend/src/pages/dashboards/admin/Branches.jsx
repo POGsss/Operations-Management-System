@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import MetricCard from '../../../components/MetricCard';
-import { HiChevronDown, HiX, HiSearch, HiPlus } from 'react-icons/hi';
+import { HiChevronDown, HiX, HiSearch, HiPlus, HiPencil, HiTrash } from 'react-icons/hi';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL + '/api';
@@ -29,6 +29,8 @@ const Branches = () => {
   });
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [branchToDelete, setBranchToDelete] = useState(null);
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -253,18 +255,22 @@ const Branches = () => {
     }
   };
 
-  const handleDeleteBranch = async (branch) => {
+  const handleDeleteBranch = (branch) => {
     if (!isAdmin) return;
-    const confirmed = window.confirm(
-      `Are you sure you want to delete branch "${branch.name}"?`,
-    );
-    if (!confirmed) return;
+    setBranchToDelete(branch);
+    setShowConfirmDialog(true);
+  };
+
+  const confirmDeleteBranch = async () => {
+    if (!branchToDelete) return;
+
+    setShowConfirmDialog(false);
 
     try {
-      setDeletingId(branch.id);
+      setDeletingId(branchToDelete.id);
       setError(null);
 
-      const res = await fetch(`${API_URL}/branches/${branch.id}`, {
+      const res = await fetch(`${API_URL}/branches/${branchToDelete.id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
@@ -276,8 +282,8 @@ const Branches = () => {
         throw new Error(data.error || 'Failed to delete branch');
       }
 
-      setBranches((prev) => prev.filter((b) => b.id !== branch.id));
-      if (expandedBranch === branch.id) {
+      setBranches((prev) => prev.filter((b) => b.id !== branchToDelete.id));
+      if (expandedBranch === branchToDelete.id) {
         setExpandedBranch(null);
       }
     } catch (err) {
@@ -285,7 +291,13 @@ const Branches = () => {
       setError(err.message);
     } finally {
       setDeletingId(null);
+      setBranchToDelete(null);
     }
+  };
+
+  const cancelDeleteBranch = () => {
+    setShowConfirmDialog(false);
+    setBranchToDelete(null);
   };
 
   const getStatusColor = (status) => {
@@ -425,160 +437,207 @@ const Branches = () => {
       </div>
 
       {/* Branches Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        {loading ? (
-          <div className="p-6 text-center text-gray-600">Loading branches...</div>
-        ) : paginatedBranches.length === 0 ? (
-          <div className="p-6 text-center text-gray-600">No branches found</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                    Code
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                    City
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                    Manager
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedBranches.map((branch) => (
-                  <React.Fragment key={branch.id}>
-                    <tr className="border-b border-gray-200 last:border-none hover:bg-gray-50 transition">
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                        {branch.name}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-mono text-gray-600">
-                        {branch.code}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {branch.city}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {(() => {
-                          const managerUser = managerMap.get(branch.manager_id);
-                          return managerUser?.full_name || '—';
-                        })()}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
-                            branch.status
-                          )}`}
-                        >
-                          {branch.status === 'active' ? '✓ Active' : '○ Inactive'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <div className="flex items-center justify-center space-x-2">
-                          {isAdmin && (
-                            <>
-                              <button
-                                onClick={() => openEditModal(branch)}
-                                className="px-3 py-1 text-sm text-gray-600 hover:text-black hover:bg-gray-100 rounded transition"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDeleteBranch(branch)}
-                                disabled={deletingId === branch.id}
-                                className="px-3 py-1 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                Delete
-                              </button>
-                            </>
-                          )}
-                          <button
-                            onClick={() =>
-                              setExpandedBranch(
-                                expandedBranch === branch.id ? null : branch.id
-                              )
-                            }
-                            className="text-gray-600 hover:text-black transition"
-                          >
-                            <HiChevronDown
-                              className={`w-5 h-5 transform transition ${
-                                expandedBranch === branch.id ? 'rotate-180' : ''
-                              }`}
-                            />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+      <div className="bg-white rounded-lg shadow border border-gray-200 overflow-x-auto">
+        <table className="min-w-[1000px] w-full table-auto">
+          <thead>
+            <tr className="border-b border-gray-200">
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                Name
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                Code
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                City
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                Manager
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                Status
+              </th>
+              <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">
+                Actions
+              </th>
+            </tr>
+          </thead>
 
-                    {/* Expanded Details Row */}
-                    {expandedBranch === branch.id && (
-                      <tr className="bg-gray-50 border-b border-gray-200">
-                        <td colSpan="6" className="px-6 py-4">
-                          <div className="space-y-4">
-                            <div>
-                              <p className="text-sm font-semibold text-gray-700 mb-2">
-                                Branch Information:
-                              </p>
-                              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-white p-4 rounded border border-gray-200">
-                                <div>
-                                  <p className="text-xs text-gray-600 font-medium">Full Name</p>
-                                  <p className="text-sm text-gray-900">{branch.name}</p>
-                                </div>
-                                <div>
-                                  <p className="text-xs text-gray-600 font-medium">Branch Code</p>
-                                  <p className="text-sm text-gray-900 font-mono">{branch.code}</p>
-                                </div>
-                                <div>
-                                  <p className="text-xs text-gray-600 font-medium">City</p>
-                                  <p className="text-sm text-gray-900">{branch.city}</p>
-                                </div>
-                                <div>
-                                  <p className="text-xs text-gray-600 font-medium">Manager</p>
-                                  <p className="text-sm text-gray-900">
-                                    {(() => {
-                                      const managerUser = managerMap.get(branch.manager_id);
-                                      return managerUser?.full_name || 'Not assigned';
-                                    })()}
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="text-xs text-gray-600 font-medium">Status</p>
-                                  <p className={`text-sm font-medium ${branch.status === 'active' ? 'text-green-700' : 'text-red-700'}`}>
-                                    {branch.status === 'active' ? 'Active' : 'Inactive'}
-                                  </p>
-                                </div>
-                                {branch.created_at && (
-                                  <div>
-                                    <p className="text-xs text-gray-600 font-medium">Created</p>
-                                    <p className="text-sm text-gray-900">{formatDate(branch.created_at)}</p>
-                                  </div>
-                                )}
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan="6" className="px-6 py-8 text-center text-gray-600">
+                  Loading branches...
+                </td>
+              </tr>
+            ) : paginatedBranches.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="px-6 py-8 text-center text-gray-600">
+                  No branches found
+                </td>
+              </tr>
+            ) : (
+              paginatedBranches.map((branch) => (
+                <React.Fragment key={branch.id}>
+                  <tr className="border-b border-gray-200 hover:bg-gray-50 transition last:border-0">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                      {branch.name}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-mono text-gray-600">
+                      {branch.code}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {branch.city}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {managerMap.get(branch.manager_id)?.full_name || '—'}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
+                          branch.status
+                        )}`}
+                      >
+                        {branch.status === 'active' ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex items-center justify-center space-x-2">
+                        {isAdmin && (
+                          <>
+                            <button
+                              onClick={() => openEditModal(branch)}
+                              className="text-sm text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition"
+                            >
+                              <HiPencil className="w-5 h-5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteBranch(branch)}
+                              className="text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition"
+                            >
+                              <HiTrash className="w-5 h-5" />
+                            </button>
+                          </>
+                        )}
+                        <button
+                          onClick={() =>
+                            setExpandedBranch(
+                              expandedBranch === branch.id ? null : branch.id
+                            )
+                          }
+                          className="text-gray-600 hover:text-black transition"
+                        >
+                          <HiChevronDown
+                            className={`w-5 h-5 transform transition ${expandedBranch === branch.id ? 'rotate-180' : ''
+                              }`}
+                          />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+
+                  {expandedBranch === branch.id && (
+                    <tr className="bg-gray-50 border-b border-gray-200">
+                      <td colSpan="6" className="px-6 py-4">
+                        <div className="space-y-4">
+                          {/* Branch Details */}
+                          <div>
+                            <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                              Branch Information
+                            </h4>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="bg-white rounded-lg p-3 border border-gray-200">
+                                <p className="text-xs text-gray-500 mb-1">Branch ID</p>
+                                <p className="text-sm text-gray-900 font-mono">{branch.id}</p>
+                              </div>
+                              <div className="bg-white rounded-lg p-3 border border-gray-200">
+                                <p className="text-xs text-gray-500 mb-1">Branch Code</p>
+                                <p className="text-sm text-gray-900 font-mono">{branch.code}</p>
+                              </div>
+                              <div className="bg-white rounded-lg p-3 border border-gray-200">
+                                <p className="text-xs text-gray-500 mb-1">City</p>
+                                <p className="text-sm text-gray-900">{branch.city}</p>
+                              </div>
+                              <div className="bg-white rounded-lg p-3 border border-gray-200">
+                                <p className="text-xs text-gray-500 mb-1">Status</p>
+                                <span
+                                  className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
+                                    branch.status
+                                  )}`}
+                                >
+                                  {branch.status === 'active' ? 'Active' : 'Inactive'}
+                                </span>
                               </div>
                             </div>
                           </div>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+
+                          {/* Manager Information */}
+                          <div>
+                            <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                              Manager Information
+                            </h4>
+                            <div className="bg-white rounded-lg p-4 border border-gray-200">
+                              {managerMap.get(branch.manager_id) ? (
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-xs text-gray-500">Name</p>
+                                    <p className="text-sm text-gray-900 font-medium">
+                                      {managerMap.get(branch.manager_id)?.full_name}
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-xs text-gray-500">Email</p>
+                                    <p className="text-sm text-gray-600">
+                                      {managerMap.get(branch.manager_id)?.email}
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-xs text-gray-500">Manager ID</p>
+                                    <p className="text-sm text-gray-600 font-mono">
+                                      {branch.manager_id}
+                                    </p>
+                                  </div>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-gray-500 italic">No manager assigned</p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Timestamps */}
+                          <div>
+                            <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                              Timestamps
+                            </h4>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="bg-white rounded-lg p-3 border border-gray-200">
+                                <p className="text-xs text-gray-500 mb-1">Created At</p>
+                                <p className="text-sm text-gray-900">
+                                  {formatDate(branch.created_at)}
+                                </p>
+                              </div>
+                              {branch.updated_at && (
+                                <div className="bg-white rounded-lg p-3 border border-gray-200">
+                                  <p className="text-xs text-gray-500 mb-1">Updated At</p>
+                                  <p className="text-sm text-gray-900">
+                                    {formatDate(branch.updated_at)}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))
+            )}
+          </tbody>
+        </table>
 
         {/* Pagination Footer */}
         {!loading && filteredBranches.length > 0 && (
-          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+          <div className="min-w-[1000px] w-full px-6 py-4 border-t border-gray-200 flex items-center justify-between">
             <div className="text-sm text-gray-600">
               Showing <span className="font-semibold">{offset + 1}</span> to{' '}
               <span className="font-semibold">
@@ -639,11 +698,10 @@ const Branches = () => {
                           page: pageNum,
                         }))
                       }
-                      className={`px-3 py-1 border rounded text-sm transition ${
-                        pagination.page === pageNum
-                          ? 'bg-black text-white border-black'
-                          : 'border-gray-300 hover:bg-gray-100'
-                      }`}
+                      className={`px-3 py-1 border rounded text-sm transition ${pagination.page === pageNum
+                        ? 'bg-black text-white border-black'
+                        : 'border-gray-300 hover:bg-gray-100'
+                        }`}
                     >
                       {pageNum}
                     </button>
@@ -670,8 +728,9 @@ const Branches = () => {
 
       {/* Add / Edit Branch Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl max-w-xl w-full max-h-[90vh] overflow-y-auto z-50">
             <div className="p-6 border-b border-gray-200 flex items-center justify-between">
               <h2 className="text-2xl font-bold text-black">
                 {editingBranch ? 'Edit Branch' : 'Add Branch'}
@@ -734,7 +793,23 @@ const Branches = () => {
                   />
                 </div>
 
-                <div>
+                <div className='relative'>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status *
+                  </label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleFormChange}
+                    className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                  <ChevronDownIcon className="absolute right-3 top-10 w-5 h-5 text-gray-600 pointer-events-none" />
+                </div>
+
+                <div className='relative col-span-2'>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Manager (User)
                   </label>
@@ -742,7 +817,7 @@ const Branches = () => {
                     name="managerId"
                     value={formData.managerId}
                     onChange={handleFormChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+                    className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
                   >
                     <option value="">
                       {managersLoading ? 'Loading managers...' : 'Unassigned'}
@@ -753,25 +828,11 @@ const Branches = () => {
                       </option>
                     ))}
                   </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Status *
-                  </label>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleFormChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
-                  >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
+                  <ChevronDownIcon className="absolute right-3 top-10 w-5 h-5 text-gray-600 pointer-events-none" />
                 </div>
               </div>
 
-              <div className="pt-4 flex justify-end space-x-3 border-t border-gray-200">
+              <div className="pt-4 flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => {
@@ -792,11 +853,59 @@ const Branches = () => {
                       ? 'Saving...'
                       : 'Creating...'
                     : editingBranch
-                    ? 'Save Changes'
-                    : 'Create Branch'}
+                      ? 'Save Changes'
+                      : 'Create Branch'}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showConfirmDialog && branchToDelete && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6 animate-in z-50">
+            {/* Modal Header */}
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold text-black">Delete Branch</h2>
+            </div>
+
+            {/* Modal Body */}
+            <div className="mb-6">
+              <p className="text-gray-600 text-sm mb-4">
+                Are you sure you want to delete this branch?
+              </p>
+              <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                <p className="text-sm text-gray-700 mb-2">
+                  <span className="font-semibold">Branch Name:</span> {branchToDelete.name}
+                </p>
+                <p className="text-sm text-gray-700 mb-2">
+                  <span className="font-semibold">Code:</span> {branchToDelete.code}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">City:</span> {branchToDelete.city}
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex gap-3">
+              <button
+                onClick={cancelDeleteBranch}
+                className="flex-1 px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteBranch}
+                disabled={deletingId === branchToDelete.id}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deletingId === branchToDelete.id ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
           </div>
         </div>
       )}

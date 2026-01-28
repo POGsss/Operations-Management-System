@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.js';
 import branchRoutes from './routes/branches.js';
+import customerRoutes from './routes/customers.js';
+import jobOrderRoutes from './routes/jobOrders.js';
 import { verifyToken } from './middlewares/auth.js';
 
 const app = express();
@@ -19,6 +21,12 @@ app.use('/api/auth', authRoutes);
 
 // Branch routes (authentication required)
 app.use('/api/branches', branchRoutes);
+
+// Customer routes (authentication required)
+app.use('/api/customers', customerRoutes);
+
+// Job Order routes (authentication required)
+app.use('/api/jobs', jobOrderRoutes);
 
 // Protected route example
 app.get('/api/protected', verifyToken, (req, res) => {
