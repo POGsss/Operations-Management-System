@@ -44,6 +44,14 @@ const JobOrders = () => {
   const [selectedJob, setSelectedJob] = useState(null);
   const [jobDetails, setJobDetails] = useState(null);
 
+  // Confirmation modal states
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showUnassignModal, setShowUnassignModal] = useState(false);
+  const [jobToApprove, setJobToApprove] = useState(null);
+  const [jobToReject, setJobToReject] = useState(null);
+  const [mechanicToUnassign, setMechanicToUnassign] = useState(null);
+
   // Filter states
   const [filters, setFilters] = useState({
     search: '',
@@ -149,16 +157,44 @@ const JobOrders = () => {
     }
   };
 
-  // Handle approve job
-  const handleApproveJob = async (jobId) => {
-    if (!confirm('Are you sure you want to approve this job order?')) return;
-    await handleStatusChange(jobId, 'APPROVED');
+  // Handle approve job - open modal
+  const handleApproveJob = (jobId) => {
+    setJobToApprove(jobId);
+    setShowApproveModal(true);
   };
 
-  // Handle reject job (back to draft)
-  const handleRejectJob = async (jobId) => {
-    if (!confirm('Are you sure you want to send this back to draft for revisions?')) return;
-    await handleStatusChange(jobId, 'DRAFT');
+  // Confirm approve job
+  const confirmApproveJob = async () => {
+    if (!jobToApprove) return;
+    await handleStatusChange(jobToApprove, 'APPROVED');
+    setShowApproveModal(false);
+    setJobToApprove(null);
+  };
+
+  // Cancel approve job
+  const cancelApproveJob = () => {
+    setShowApproveModal(false);
+    setJobToApprove(null);
+  };
+
+  // Handle reject job - open modal
+  const handleRejectJob = (jobId) => {
+    setJobToReject(jobId);
+    setShowRejectModal(true);
+  };
+
+  // Confirm reject job
+  const confirmRejectJob = async () => {
+    if (!jobToReject) return;
+    await handleStatusChange(jobToReject, 'DRAFT');
+    setShowRejectModal(false);
+    setJobToReject(null);
+  };
+
+  // Cancel reject job
+  const cancelRejectJob = () => {
+    setShowRejectModal(false);
+    setJobToReject(null);
   };
 
   // Handle assign mechanic
@@ -174,17 +210,31 @@ const JobOrders = () => {
     }
   };
 
-  // Handle unassign mechanic
-  const handleUnassignMechanic = async (mechanicId) => {
-    if (!confirm('Are you sure you want to unassign this mechanic?')) return;
+  // Handle unassign mechanic - open modal
+  const handleUnassignMechanic = (mechanicId, mechanicName) => {
+    setMechanicToUnassign({ id: mechanicId, name: mechanicName });
+    setShowUnassignModal(true);
+  };
+
+  // Confirm unassign mechanic
+  const confirmUnassignMechanic = async () => {
+    if (!mechanicToUnassign) return;
     try {
-      await unassignMechanic(session, selectedJob.id, mechanicId);
+      await unassignMechanic(session, selectedJob.id, mechanicToUnassign.id);
       const data = await fetchJobById(session, selectedJob.id);
       setJobDetails(data.job);
       loadJobs();
     } catch (err) {
       alert(err.message);
     }
+    setShowUnassignModal(false);
+    setMechanicToUnassign(null);
+  };
+
+  // Cancel unassign mechanic
+  const cancelUnassignMechanic = () => {
+    setShowUnassignModal(false);
+    setMechanicToUnassign(null);
   };
 
   // Format currency
@@ -608,7 +658,7 @@ const JobOrders = () => {
                         </div>
                         {['ESTIMATED', 'APPROVED'].includes(jobDetails.status) && (
                           <button
-                            onClick={() => handleUnassignMechanic(assignment.mechanic?.id)}
+                            onClick={() => handleUnassignMechanic(assignment.mechanic?.id, assignment.mechanic?.full_name)}
                             className="text-red-500 hover:text-red-700"
                           >
                             <HiX className="w-5 h-5" />
@@ -834,6 +884,132 @@ const JobOrders = () => {
               ) : (
                 <p className="text-center text-gray-600 py-4">No mechanics available</p>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Approve Confirmation Modal */}
+      {showApproveModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-[70]">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6 z-[70]">
+            {/* Modal Header */}
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold text-black">Approve Job Order</h2>
+            </div>
+
+            {/* Modal Body */}
+            <div className="mb-6">
+              <p className="text-gray-600 text-sm mb-4">
+                Are you sure you want to approve this job order? This will allow work to begin on the vehicle.
+              </p>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="text-sm text-green-800">
+                  <span className="font-semibold">Job ID:</span>{' '}
+                  #{jobToApprove?.substring(0, 8)}
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex gap-3">
+              <button
+                onClick={cancelApproveJob}
+                className="flex-1 px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmApproveJob}
+                className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-medium"
+              >
+                Approve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reject Confirmation Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-[70]">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6 z-[70]">
+            {/* Modal Header */}
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold text-black">Reject Job Order</h2>
+            </div>
+
+            {/* Modal Body */}
+            <div className="mb-6">
+              <p className="text-gray-600 text-sm mb-4">
+                Are you sure you want to reject this job order? It will be sent back to draft for revisions.
+              </p>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-sm text-red-800">
+                  <span className="font-semibold">Job ID:</span>{' '}
+                  #{jobToReject?.substring(0, 8)}
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex gap-3">
+              <button
+                onClick={cancelRejectJob}
+                className="flex-1 px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmRejectJob}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-medium"
+              >
+                Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Unassign Mechanic Confirmation Modal */}
+      {showUnassignModal && mechanicToUnassign && (
+        <div className="fixed inset-0 flex items-center justify-center z-[70]">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6 z-[70]">
+            {/* Modal Header */}
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold text-black">Unassign Mechanic</h2>
+            </div>
+
+            {/* Modal Body */}
+            <div className="mb-6">
+              <p className="text-gray-600 text-sm mb-4">
+                Are you sure you want to unassign this mechanic from the job?
+              </p>
+              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Mechanic:</span>{' '}
+                  {mechanicToUnassign.name || 'Unknown'}
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex gap-3">
+              <button
+                onClick={cancelUnassignMechanic}
+                className="flex-1 px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmUnassignMechanic}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-medium"
+              >
+                Unassign
+              </button>
             </div>
           </div>
         </div>

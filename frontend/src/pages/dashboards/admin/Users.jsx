@@ -51,6 +51,17 @@ const Users = () => {
         { value: 'executive', label: 'Executive' },
     ];
 
+    // Helper function to format role names for display
+    const formatRoleName = (role) => {
+        if (!role) return '-';
+        const roleObj = roles.find(r => r.value === role);
+        if (roleObj) return roleObj.label;
+        // Fallback: capitalize and replace underscores
+        return role.split('_').map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+    };
+
     const itemsPerPage = pagination.pageSize;
 
     // Fetch users and branches
@@ -446,9 +457,9 @@ const Users = () => {
                             className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
                         >
                             <option value="all">All Roles</option>
-                            {getUniqueRoles.map((role) => (
-                                <option key={role} value={role}>
-                                    {role.replace('_', ' ').charAt(0).toUpperCase() + role.replace('_', ' ').slice(1)}
+                            {roles.map((role) => (
+                                <option key={role.value} value={role.value}>
+                                    {role.label}
                                 </option>
                             ))}
                         </select>
@@ -537,7 +548,7 @@ const Users = () => {
                                     </td>
                                     <td className="px-6 py-4 text-sm">
                                         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            {user.role.replace('_', ' ').charAt(0).toUpperCase() + user.role.replace('_', ' ').slice(1)}
+                                            {formatRoleName(user.role)}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-600">
@@ -712,12 +723,11 @@ const Users = () => {
                                         className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
                                         required
                                     >
-                                        <option value="mechanic">Mechanic</option>
-                                        <option value="manager">Manager</option>
-                                        <option value="advisor">Advisor</option>
-                                        <option value="inventory">Inventory</option>
-                                        <option value="executive">Executive</option>
-                                        <option value="admin">Admin</option>
+                                        {roles.map((role) => (
+                                            <option key={role.value} value={role.value}>
+                                                {role.label}
+                                            </option>
+                                        ))}
                                     </select>
                                     <ChevronDownIcon className="absolute right-3 top-10 w-5 h-5 text-gray-600 pointer-events-none" />
                                 </div>
