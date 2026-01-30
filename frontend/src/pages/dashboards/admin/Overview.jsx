@@ -7,7 +7,7 @@ const Overview = () => {
 
   return (
     <div className="space-y-8">
-      <div className="mb-8">
+      <div>
         <h1 className="text-3xl font-bold text-black mb-2">Welcome, {user?.full_name}</h1>
         <p className="text-gray-600">System overview and key metrics</p>
       </div>
@@ -79,7 +79,7 @@ const Overview = () => {
       {/* Content Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Activity */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+        <div className="bg-white rounded-lg p-6 shadow border border-gray-200">
           <h3 className="text-xl font-bold text-black mb-4">Recent Activity</h3>
           <div className="space-y-4">
             {[
@@ -100,7 +100,7 @@ const Overview = () => {
         </div>
 
         {/* System Health */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+        <div className="bg-white rounded-lg p-6 shadow border border-gray-200">
           <h3 className="text-xl font-bold text-black mb-4">System Health</h3>
           <div className="space-y-4">
             {[
@@ -122,7 +122,7 @@ const Overview = () => {
       </div>
 
       {/* Chart Placeholder */}
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+      <div className="bg-white rounded-lg p-6 shadow border border-gray-200">
         <h3 className="text-xl font-bold text-black mb-4">System Usage Trend</h3>
         <div className="h-64 bg-gradient-to-b from-gray-100 to-gray-50 rounded-lg flex items-center justify-center">
           <div className="text-center">

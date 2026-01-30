@@ -13,6 +13,7 @@ import {
   HiExclamationCircle,
   HiBadgeCheck,
   HiCurrencyDollar,
+  HiChevronDown,
 } from 'react-icons/hi';
 import {
   fetchJobs,
@@ -207,40 +208,34 @@ const JobOrders = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Job Orders Management</h1>
-        <p className="text-gray-600 mt-1">Review, approve, and manage job orders in your branch</p>
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-black mb-2">Job Orders Management</h1>
+            <p className="text-gray-600">Review, approve, and manage job orders in your branch</p>
+          </div>
+        </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-        <MetricCard title="Total Jobs" value={stats.total} icon={HiClipboardList} color="blue" />
-        <MetricCard
-          title="Pending Approval"
-          value={stats.pendingApproval}
-          icon={HiClock}
-          color="yellow"
-        />
-        <MetricCard title="Approved" value={stats.approved} icon={HiBadgeCheck} color="green" />
-        <MetricCard title="In Progress" value={stats.inProgress} icon={HiExclamationCircle} color="blue" />
-        <MetricCard title="Quality Check" value={stats.qualityCheck} icon={HiCheckCircle} color="purple" />
-        <MetricCard
-          title="Revenue"
-          value={formatCurrency(stats.totalRevenue)}
-          icon={HiCurrencyDollar}
-          color="green"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+        <MetricCard title="Total Jobs" value={stats.total} />
+        <MetricCard title="Pending Approval" value={stats.pendingApproval} />
+        <MetricCard title="Approved" value={stats.approved} />
+        <MetricCard title="In Progress" value={stats.inProgress} />
+        <MetricCard title="Quality Check" value={stats.qualityCheck} />
+        <MetricCard title="Revenue" value={formatCurrency(stats.totalRevenue)} />
       </div>
 
       {/* Pending Approval Alert */}
       {stats.pendingApproval > 0 && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg">
           <div className="flex items-center">
-            <HiClock className="w-6 h-6 text-yellow-400 mr-3" />
+            <HiClock className="w-6 h-6 text-yellow-600 mr-3" />
             <div>
-              <p className="font-medium text-yellow-800">
+              <p className="font-medium">
                 {stats.pendingApproval} job order(s) pending your approval
               </p>
               <p className="text-sm text-yellow-700">
@@ -252,107 +247,121 @@ const JobOrders = () => {
       )}
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search by Job ID, Customer, or Vehicle Plate..."
-              value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+      <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+        <h2 className="text-lg font-bold text-black mb-4">Filters</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Search
+            </label>
+            <div className="relative">
+              <HiSearch className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by Job ID, Customer, or Vehicle Plate..."
+                value={filters.search}
+                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900 pl-10"
+              />
+            </div>
           </div>
-          <select
-            value={filters.status}
-            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">All Statuses</option>
-            {Object.entries(STATUS_LABELS).map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Status
+            </label>
+            <select
+              value={filters.status}
+              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+              className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
+            >
+              <option value="all">All Statuses</option>
+              {Object.entries(STATUS_LABELS).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            <HiChevronDown className="absolute right-3 top-10 w-5 h-5 text-gray-600 pointer-events-none" />
+          </div>
         </div>
+        <button
+          onClick={() => setFilters({ search: '', status: 'all' })}
+          className="text-sm text-black hover:text-gray-700 font-medium"
+        >
+          Clear All Filters
+        </button>
       </div>
 
       {/* Jobs Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow border border-gray-200 overflow-x-auto">
         {loading ? (
-          <div className="p-8 text-center text-gray-500">Loading jobs...</div>
+          <div className="px-6 py-8 text-center text-gray-600">Loading jobs...</div>
         ) : error ? (
-          <div className="p-8 text-center text-red-500">{error}</div>
+          <div className="px-6 py-8 text-center text-red-600">{error}</div>
         ) : paginatedJobs.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">No job orders found</div>
+          <div className="px-6 py-8 text-center text-gray-600">No job orders found</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <>
+            <table className="min-w-[1000px] w-full table-auto">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                     Job ID
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                     Customer
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                     Vehicle
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                     Mechanics
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                     Estimated
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody>
                 {paginatedJobs.map((job) => (
                   <tr
                     key={job.id}
-                    className={`hover:bg-gray-50 ${
+                    className={`border-b border-gray-200 hover:bg-gray-50 transition last:border-0 ${
                       job.status === 'ESTIMATED' ? 'bg-yellow-50' : ''
                     }`}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="font-mono text-sm text-gray-900">
-                        #{job.id?.substring(0, 8)}
-                      </span>
+                    <td className="px-6 py-4 text-sm font-mono text-gray-900">
+                      #{job.id?.substring(0, 8)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">
                         {job.customer?.full_name || 'N/A'}
                       </div>
-                      <div className="text-sm text-gray-500">{job.customer?.phone || ''}</div>
+                      <div className="text-sm text-gray-600">{job.customer?.phone || ''}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{job.vehicle_plate || '-'}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 text-sm text-gray-900">{job.vehicle_plate || '-'}</td>
+                    <td className="px-6 py-4 text-sm">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
                           STATUS_COLORS[job.status] || 'bg-gray-100 text-gray-800'
                         }`}
                       >
                         {STATUS_LABELS[job.status] || job.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4">
                       {job.job_assignments?.length > 0 ? (
                         <div className="flex -space-x-2">
                           {job.job_assignments.slice(0, 3).map((a, idx) => (
                             <div
                               key={idx}
-                              className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-medium border-2 border-white"
+                              className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-medium border-2 border-white"
                               title={a.mechanic?.full_name}
                             >
                               {a.mechanic?.full_name?.charAt(0) || '?'}
@@ -368,14 +377,14 @@ const JobOrders = () => {
                         <span className="text-sm text-gray-400">None</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 text-sm text-gray-900">
                       {formatCurrency(job.total_estimated)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => handleViewJob(job)}
-                          className="text-blue-600 hover:text-blue-800"
+                          className="text-sm text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition"
                           title="View Details"
                         >
                           <HiEye className="w-5 h-5" />
@@ -384,14 +393,14 @@ const JobOrders = () => {
                           <>
                             <button
                               onClick={() => handleApproveJob(job.id)}
-                              className="text-green-600 hover:text-green-800"
+                              className="text-sm text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition"
                               title="Approve"
                             >
                               <HiCheck className="w-5 h-5" />
                             </button>
                             <button
                               onClick={() => handleRejectJob(job.id)}
-                              className="text-red-600 hover:text-red-800"
+                              className="text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition"
                               title="Reject / Revise"
                             >
                               <HiXCircle className="w-5 h-5" />
@@ -401,7 +410,7 @@ const JobOrders = () => {
                         {job.status === 'QUALITY_CHECK' && (
                           <button
                             onClick={() => handleStatusChange(job.id, 'BILLED')}
-                            className="text-orange-600 hover:text-orange-800"
+                            className="text-sm text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition"
                             title="Mark as Billed"
                           >
                             <HiCurrencyDollar className="w-5 h-5" />
@@ -410,7 +419,7 @@ const JobOrders = () => {
                         {job.status === 'BILLED' && (
                           <button
                             onClick={() => handleStatusChange(job.id, 'RELEASED')}
-                            className="text-emerald-600 hover:text-emerald-800"
+                            className="text-sm text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition"
                             title="Release Vehicle"
                           >
                             <HiCheckCircle className="w-5 h-5" />
@@ -422,29 +431,82 @@ const JobOrders = () => {
                 ))}
               </tbody>
             </table>
-          </div>
+          </>
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="px-6 py-4 border-t flex items-center justify-between">
-            <div className="text-sm text-gray-500">
-              Showing {(pagination.page - 1) * pagination.pageSize + 1} to{' '}
-              {Math.min(pagination.page * pagination.pageSize, filteredJobs.length)} of{' '}
-              {filteredJobs.length} jobs
+        {!loading && filteredJobs.length > 0 && (
+          <div className="min-w-[1000px] w-full px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <div className="text-sm text-gray-600">
+              Showing <span className="font-semibold">{(pagination.page - 1) * pagination.pageSize + 1}</span> to{' '}
+              <span className="font-semibold">
+                {Math.min(pagination.page * pagination.pageSize, filteredJobs.length)}
+              </span>{' '}
+              of <span className="font-semibold">{filteredJobs.length}</span> jobs
             </div>
-            <div className="flex gap-2">
+
+            <div className="flex items-center space-x-2">
+              <select
+                value={pagination.pageSize}
+                onChange={(e) =>
+                  setPagination((prev) => ({
+                    ...prev,
+                    pageSize: parseInt(e.target.value),
+                    page: 1,
+                  }))
+                }
+                className="appearance-none px-3 py-1 border border-gray-300 rounded text-sm bg-white"
+              >
+                <option value="10">10 per page</option>
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+              </select>
+
               <button
                 onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
                 disabled={pagination.page === 1}
-                className="px-3 py-1 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition"
               >
                 Previous
               </button>
+
+              <div className="flex items-center space-x-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (pagination.page <= 3) {
+                    pageNum = i + 1;
+                  } else if (pagination.page >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = pagination.page - 2 + i;
+                  }
+
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() =>
+                        setPagination((prev) => ({
+                          ...prev,
+                          page: pageNum,
+                        }))
+                      }
+                      className={`px-3 py-1 border rounded text-sm transition ${pagination.page === pageNum
+                        ? 'bg-black text-white border-black'
+                        : 'border-gray-300 hover:bg-gray-100'
+                        }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
               <button
                 onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
                 disabled={pagination.page === totalPages}
-                className="px-3 py-1 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition"
               >
                 Next
               </button>
@@ -455,15 +517,17 @@ const JobOrders = () => {
 
       {/* View Job Modal */}
       {isViewModalOpen && jobDetails && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col z-50">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold">
+                <h2 className="text-2xl font-bold text-black">
                   Job #{jobDetails.id?.substring(0, 8)}
                 </h2>
                 <span
-                  className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
+                  className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full mt-2 ${
                     STATUS_COLORS[jobDetails.status] || 'bg-gray-100'
                   }`}
                 >
@@ -472,7 +536,7 @@ const JobOrders = () => {
               </div>
               <button
                 onClick={() => setIsViewModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-500 hover:text-gray-700 transition"
               >
                 <HiX className="w-6 h-6" />
               </button>
@@ -671,8 +735,8 @@ const JobOrders = () => {
             </div>
 
             {/* Footer Actions */}
-            <div className="border-t p-4 flex justify-between items-center bg-gray-50">
-              <div className="text-sm text-gray-500">
+            <div className="border-t border-gray-200 p-6 flex justify-between items-center bg-gray-50">
+              <div className="text-sm text-gray-600">
                 Created: {formatDate(jobDetails.created_at)}
                 {jobDetails.creator && ` by ${jobDetails.creator.full_name}`}
               </div>
@@ -681,13 +745,13 @@ const JobOrders = () => {
                   <>
                     <button
                       onClick={() => handleRejectJob(jobDetails.id)}
-                      className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-medium"
                     >
                       Reject / Revise
                     </button>
                     <button
                       onClick={() => handleApproveJob(jobDetails.id)}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                      className="px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg transition font-medium"
                     >
                       Approve
                     </button>
@@ -696,7 +760,7 @@ const JobOrders = () => {
                 {jobDetails.status === 'QUALITY_CHECK' && (
                   <button
                     onClick={() => handleStatusChange(jobDetails.id, 'BILLED')}
-                    className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                    className="px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg transition font-medium"
                   >
                     Mark as Billed
                   </button>
@@ -704,14 +768,14 @@ const JobOrders = () => {
                 {jobDetails.status === 'BILLED' && (
                   <button
                     onClick={() => handleStatusChange(jobDetails.id, 'RELEASED')}
-                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                    className="px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg transition font-medium"
                   >
                     Release Vehicle
                   </button>
                 )}
                 <button
                   onClick={() => setIsViewModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium"
                 >
                   Close
                 </button>
@@ -723,18 +787,22 @@ const JobOrders = () => {
 
       {/* Assign Mechanic Modal */}
       {isAssignModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-lg font-semibold">Assign Mechanic</h2>
+        <div className="fixed inset-0 flex items-center justify-center z-[60] p-4">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto z-[60]">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-black">Assign Mechanic</h2>
               <button
                 onClick={() => setIsAssignModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-500 hover:text-gray-700 transition"
               >
                 <HiX className="w-6 h-6" />
               </button>
             </div>
-            <div className="p-4">
+
+            {/* Modal Body */}
+            <div className="p-6">
               {mechanics.length > 0 ? (
                 <div className="space-y-2">
                   {mechanics
@@ -746,11 +814,11 @@ const JobOrders = () => {
                       <button
                         key={mechanic.id}
                         onClick={() => handleAssignMechanic(mechanic.id)}
-                        className="w-full flex items-center justify-between p-3 border rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                        className="w-full flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition"
                       >
                         <div className="text-left">
-                          <p className="font-medium">{mechanic.full_name}</p>
-                          <p className="text-sm text-gray-500">{mechanic.email}</p>
+                          <p className="font-medium text-gray-900">{mechanic.full_name}</p>
+                          <p className="text-sm text-gray-600">{mechanic.email}</p>
                         </div>
                       </button>
                     ))}
@@ -758,13 +826,13 @@ const JobOrders = () => {
                     (m) =>
                       !jobDetails?.job_assignments?.some((a) => a.mechanic?.id === m.id)
                   ).length === 0 && (
-                    <p className="text-center text-gray-500 py-4">
+                    <p className="text-center text-gray-600 py-4">
                       All mechanics are already assigned
                     </p>
                   )}
                 </div>
               ) : (
-                <p className="text-center text-gray-500 py-4">No mechanics available</p>
+                <p className="text-center text-gray-600 py-4">No mechanics available</p>
               )}
             </div>
           </div>

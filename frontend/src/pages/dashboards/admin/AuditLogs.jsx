@@ -192,7 +192,7 @@ const AuditLogs = () => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="mb-8">
+      <div>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-black mb-2">Audit Logs</h1>

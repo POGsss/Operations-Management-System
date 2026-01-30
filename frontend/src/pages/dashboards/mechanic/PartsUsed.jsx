@@ -104,52 +104,52 @@ const PartsUsed = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Parts Used</h1>
-        <p className="text-gray-600 mt-1">Track parts you've used in your jobs</p>
+        <h1 className="text-3xl font-bold text-black mb-2">Parts Used</h1>
+        <p className="text-gray-600">Track parts you've used in your jobs</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg shadow p-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <HiCube className="w-6 h-6 text-blue-600" />
+            <div className="p-2 bg-gray-100 rounded-lg">
+              <HiCube className="w-6 h-6 text-gray-600" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Total Parts Used</p>
-              <p className="text-2xl font-bold">{stats.totalParts}</p>
+              <p className="text-2xl font-bold text-black">{stats.totalParts}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <HiCube className="w-6 h-6 text-green-600" />
+            <div className="p-2 bg-gray-100 rounded-lg">
+              <HiCube className="w-6 h-6 text-gray-600" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Unique Parts</p>
-              <p className="text-2xl font-bold">{stats.uniqueParts}</p>
+              <p className="text-2xl font-bold text-black">{stats.uniqueParts}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <HiClipboardList className="w-6 h-6 text-purple-600" />
+            <div className="p-2 bg-gray-100 rounded-lg">
+              <HiClipboardList className="w-6 h-6 text-gray-600" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Jobs with Parts</p>
-              <p className="text-2xl font-bold">{stats.totalJobs}</p>
+              <p className="text-2xl font-bold text-black">{stats.totalJobs}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Search */}
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
         <div className="relative">
           <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
@@ -157,18 +157,18 @@ const PartsUsed = () => {
             placeholder="Search by part name, SKU, vehicle, or customer..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black"
           />
         </div>
       </div>
 
       {/* Parts History */}
       {loading ? (
-        <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+        <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500 border border-gray-200">
           Loading parts history...
         </div>
       ) : filteredParts.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+        <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500 border border-gray-200">
           <HiCube className="w-12 h-12 mx-auto mb-4 text-gray-300" />
           <p>No parts logged yet</p>
         </div>
@@ -177,8 +177,8 @@ const PartsUsed = () => {
           {Object.entries(groupedParts).map(([date, parts]) => (
             <div key={date}>
               <h3 className="text-sm font-semibold text-gray-500 mb-3">{date}</h3>
-              <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="divide-y">
+              <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
+                <div className="divide-y divide-gray-200">
                   {parts.map((part) => (
                     <div key={part.id} className="p-4 flex items-center justify-between">
                       <div className="flex items-center gap-4">
