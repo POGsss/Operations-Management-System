@@ -324,7 +324,7 @@ const StockLevels = () => {
         <div className="flex gap-3">
           <button
             onClick={fetchStock}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-black rounded-lg transition font-medium"
+            className="flex items-center gap-2 px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg transition font-medium"
           >
             <HiRefresh className="w-5 h-5" />
             Refresh
