@@ -384,18 +384,9 @@ const MyJobs = () => {
           <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col z-50">
             {/* Modal Header */}
             <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-black">
-                  Job #{jobDetails.id?.substring(0, 8)}
-                </h2>
-                <span
-                  className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full mt-2 ${
-                    STATUS_COLORS[jobDetails.status] || 'bg-gray-100'
-                  }`}
-                >
-                  {STATUS_LABELS[jobDetails.status] || jobDetails.status}
-                </span>
-              </div>
+              <h2 className="text-2xl font-bold text-black">
+                Job #{jobDetails.id?.substring(0, 8)}
+              </h2>
               <button
                 onClick={() => setIsViewModalOpen(false)}
                 className="text-gray-500 hover:text-gray-700 transition"
@@ -404,32 +395,46 @@ const MyJobs = () => {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto p-4 space-y-6">
               {/* Customer & Vehicle Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <h3 className="font-semibold text-black mb-2">Customer</h3>
-                  <p className="font-medium">{jobDetails.customer?.full_name}</p>
-                  <p className="text-sm text-gray-500">{jobDetails.customer?.phone}</p>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-3">Customer Information</h3>
+                  <div className="space-y-2 text-sm">
+                    <p>
+                      <span className="text-gray-500">Name:</span>{' '}
+                      <span className="font-medium">{jobDetails.customer?.full_name || '-'}</span>
+                    </p>
+                    <p>
+                      <span className="text-gray-500">Phone:</span>{' '}
+                      <span className="font-medium">{jobDetails.customer?.phone || '-'}</span>
+                    </p>
+                  </div>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <h3 className="font-semibold text-black mb-2">Vehicle</h3>
-                  <p className="font-medium">{jobDetails.vehicle_plate || 'N/A'}</p>
-                  <p className="text-sm text-gray-500">
-                    {jobDetails.odometer ? `${jobDetails.odometer.toLocaleString()} km` : '-'}
-                  </p>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-3">Vehicle Information</h3>
+                  <div className="space-y-2 text-sm">
+                    <p>
+                      <span className="text-gray-500">Plate:</span>{' '}
+                      <span className="font-medium">{jobDetails.vehicle_plate || '-'}</span>
+                    </p>
+                    <p>
+                      <span className="text-gray-500">Odometer:</span>{' '}
+                      <span className="font-medium">{jobDetails.odometer ? `${jobDetails.odometer.toLocaleString()} km` : '-'}</span>
+                    </p>
+                  </div>
                 </div>
               </div>
 
               {/* Work Items / Estimates */}
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <h3 className="font-semibold text-black mb-3">Work Items</h3>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-900 mb-3">Work Items</h3>
                 {jobDetails.job_estimates?.length > 0 ? (
                   <div className="space-y-2">
                     {jobDetails.job_estimates.map((est) => (
                       <div
                         key={est.id}
-                        className="flex items-center justify-between bg-white rounded-lg p-3 border border-gray-200"
+                        className="flex items-center justify-between bg-white rounded-lg p-3"
                       >
                         <div>
                           <p className="font-medium">{est.item_name}</p>
@@ -447,16 +452,15 @@ const MyJobs = () => {
               </div>
 
               {/* Parts Used */}
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <div className="bg-gray-50 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-black">Parts Used</h3>
+                  <h3 className="font-semibold text-gray-900">Parts Used</h3>
                   {jobDetails.status === 'IN_PROGRESS' && (
                     <button
                       onClick={() => setIsPartsModalOpen(true)}
-                      className="flex items-center gap-1 text-sm text-gray-700 hover:text-black transition"
+                      className="text-sm text-blue-600 hover:text-blue-800"
                     >
-                      <HiPlus className="w-4 h-4" />
-                      Log Part
+                      + Log Part
                     </button>
                   )}
                 </div>
@@ -465,7 +469,7 @@ const MyJobs = () => {
                     {jobDetails.job_parts_used.map((part) => (
                       <div
                         key={part.id}
-                        className="flex items-center justify-between bg-white rounded-lg p-3 border border-gray-200"
+                        className="flex items-center justify-between bg-white rounded-lg p-3"
                       >
                         <div>
                           <p className="font-medium">{part.inventory_item?.name}</p>
@@ -489,23 +493,30 @@ const MyJobs = () => {
 
               {/* Notes */}
               {jobDetails.notes && (
-                <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-                  <h3 className="font-semibold text-black mb-2">Notes</h3>
-                  <p className="text-sm text-gray-700">{jobDetails.notes}</p>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-3">Notes</h3>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{jobDetails.notes}</p>
                 </div>
               )}
             </div>
 
             {/* Footer Actions */}
-            <div className="border-t border-gray-200 p-6 flex justify-between items-center bg-gray-50">
-              <div className="text-sm text-gray-500">
-                Assigned: {formatDate(jobDetails.job_assignments?.[0]?.assigned_at)}
+            <div className="border-t border-gray-200 p-4 flex justify-between items-center">
+              <div className="text-sm text-gray-600">
+                Created: {formatDate(jobDetails.created_at)}
+                {jobDetails.creator && ` by ${jobDetails.creator.full_name}`}
               </div>
               <div className="flex gap-3">
+                <button
+                  onClick={() => setIsViewModalOpen(false)}
+                  className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium"
+                >
+                  Close
+                </button>
                 {jobDetails.status === 'APPROVED' && (
                   <button
                     onClick={() => handleStartJob(jobDetails.id)}
-                    className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+                    className="px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg transition font-medium"
                   >
                     Start Job
                   </button>
@@ -514,24 +525,18 @@ const MyJobs = () => {
                   <>
                     <button
                       onClick={() => setIsPartsModalOpen(true)}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
                     >
                       Log Parts
                     </button>
                     <button
                       onClick={() => handleCompleteJob(jobDetails.id)}
-                      className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+                      className="px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg transition font-medium"
                     >
                       Mark Complete
                     </button>
                   </>
                 )}
-                <button
-                  onClick={() => setIsViewModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-                >
-                  Close
-                </button>
               </div>
             </div>
           </div>

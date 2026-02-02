@@ -14,6 +14,7 @@ import {
   HiBadgeCheck,
   HiCurrencyDollar,
   HiChevronDown,
+  HiChevronRight
 } from 'react-icons/hi';
 import {
   fetchJobs,
@@ -382,9 +383,8 @@ const JobOrders = () => {
                 {paginatedJobs.map((job) => (
                   <tr
                     key={job.id}
-                    className={`border-b border-gray-200 hover:bg-gray-50 transition last:border-0 ${
-                      job.status === 'ESTIMATED' ? 'bg-yellow-50' : ''
-                    }`}
+                    className={`border-b border-gray-200 hover:bg-gray-50 transition last:border-0 ${job.status === 'ESTIMATED' ? 'bg-yellow-50' : ''
+                      }`}
                   >
                     <td className="px-6 py-4 text-sm font-mono text-gray-900">
                       #{job.id?.substring(0, 8)}
@@ -398,9 +398,8 @@ const JobOrders = () => {
                     <td className="px-6 py-4 text-sm text-gray-900">{job.vehicle_plate || '-'}</td>
                     <td className="px-6 py-4 text-sm">
                       <span
-                        className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
-                          STATUS_COLORS[job.status] || 'bg-gray-100 text-gray-800'
-                        }`}
+                        className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${STATUS_COLORS[job.status] || 'bg-gray-100 text-gray-800'
+                          }`}
                       >
                         {STATUS_LABELS[job.status] || job.status}
                       </span>
@@ -572,18 +571,9 @@ const JobOrders = () => {
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col z-50">
             {/* Modal Header */}
             <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-black">
-                  Job #{jobDetails.id?.substring(0, 8)}
-                </h2>
-                <span
-                  className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full mt-2 ${
-                    STATUS_COLORS[jobDetails.status] || 'bg-gray-100'
-                  }`}
-                >
-                  {STATUS_LABELS[jobDetails.status] || jobDetails.status}
-                </span>
-              </div>
+              <h2 className="text-2xl font-bold text-black">
+                Job #{jobDetails.id?.substring(0, 8)}
+              </h2>
               <button
                 onClick={() => setIsViewModalOpen(false)}
                 className="text-gray-500 hover:text-gray-700 transition"
@@ -604,11 +594,11 @@ const JobOrders = () => {
                     </p>
                     <p>
                       <span className="text-gray-500">Phone:</span>{' '}
-                      {jobDetails.customer?.phone || '-'}
+                      <span className="font-medium">{jobDetails.customer?.phone || '-'}</span>
                     </p>
                     <p>
                       <span className="text-gray-500">Email:</span>{' '}
-                      {jobDetails.customer?.email || '-'}
+                      <span className="font-medium">{jobDetails.customer?.email || '-'}</span>
                     </p>
                   </div>
                 </div>
@@ -620,11 +610,11 @@ const JobOrders = () => {
                       <span className="font-medium">{jobDetails.vehicle_plate || '-'}</span>
                     </p>
                     <p>
-                      <span className="text-gray-500">VIN:</span> {jobDetails.vehicle_vin || '-'}
+                      <span className="text-gray-500">VIN:</span> <span className="font-medium">{jobDetails.vehicle_vin || '-'}</span>
                     </p>
                     <p>
                       <span className="text-gray-500">Odometer:</span>{' '}
-                      {jobDetails.odometer ? `${jobDetails.odometer.toLocaleString()} km` : '-'}
+                      <span className="font-medium">{jobDetails.odometer ? `${jobDetails.odometer.toLocaleString()} km` : '-'}</span>
                     </p>
                   </div>
                 </div>
@@ -785,7 +775,7 @@ const JobOrders = () => {
             </div>
 
             {/* Footer Actions */}
-            <div className="border-t border-gray-200 p-6 flex justify-between items-center bg-gray-50">
+            <div className="border-t border-gray-200 p-4 flex justify-between items-center">
               <div className="text-sm text-gray-600">
                 Created: {formatDate(jobDetails.created_at)}
                 {jobDetails.creator && ` by ${jobDetails.creator.full_name}`}
@@ -870,16 +860,17 @@ const JobOrders = () => {
                           <p className="font-medium text-gray-900">{mechanic.full_name}</p>
                           <p className="text-sm text-gray-600">{mechanic.email}</p>
                         </div>
+                        <HiChevronRight className="w-5 h-5 text-gray-400" />
                       </button>
                     ))}
                   {mechanics.filter(
                     (m) =>
                       !jobDetails?.job_assignments?.some((a) => a.mechanic?.id === m.id)
                   ).length === 0 && (
-                    <p className="text-center text-gray-600 py-4">
-                      All mechanics are already assigned
-                    </p>
-                  )}
+                      <p className="text-center text-gray-600 py-4">
+                        All mechanics are already assigned
+                      </p>
+                    )}
                 </div>
               ) : (
                 <p className="text-center text-gray-600 py-4">No mechanics available</p>

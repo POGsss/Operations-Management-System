@@ -32,7 +32,7 @@ const PartsUsed = () => {
         .from('job_parts_used')
         .select(`
           *,
-          inventory_item:inventory_items(id, name, sku, unit_price),
+          inventory_item:inventory_items(id, name, sku),
           job:job_orders(id, vehicle_plate, customer:customers(full_name))
         `)
         .in('job_id', jobIds)

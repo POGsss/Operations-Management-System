@@ -19,7 +19,7 @@ const allowedTransitions = {
 // Role-based status change permissions
 const roleStatusPermissions = {
   admin: ['DRAFT', 'ESTIMATED', 'APPROVED', 'IN_PROGRESS', 'QUALITY_CHECK', 'BILLED', 'RELEASED'],
-  branch_manager: ['APPROVED', 'QUALITY_CHECK', 'BILLED', 'RELEASED'],
+  branch_manager: ['DRAFT', 'APPROVED', 'QUALITY_CHECK', 'BILLED', 'RELEASED'], // Added DRAFT for rejecting estimates
   service_advisor: ['DRAFT', 'ESTIMATED'],
   mechanic: ['IN_PROGRESS', 'QUALITY_CHECK'],
   inventory_officer: ['BILLED'],
@@ -140,7 +140,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
           quantity,
           reserved,
           used_at,
-          inventory_item:inventory_items(id, name, sku, unit_price)
+          inventory_item:inventory_items(id, name, sku)
         ),
         job_status_history(
           id,
@@ -772,7 +772,7 @@ router.post('/:id/parts', authenticateToken, async (req, res) => {
       }])
       .select(`
         *,
-        inventory_item:inventory_items(id, name, sku, unit_price)
+        inventory_item:inventory_items(id, name, sku)
       `)
       .single();
 
@@ -826,7 +826,7 @@ router.get('/:id/parts', authenticateToken, async (req, res) => {
       .from('job_parts_used')
       .select(`
         *,
-        inventory_item:inventory_items(id, name, sku, unit_price, stock)
+        inventory_item:inventory_items(id, name, sku, stock)
       `)
       .eq('job_id', id)
       .order('used_at', { ascending: true });

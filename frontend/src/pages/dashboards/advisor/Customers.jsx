@@ -407,13 +407,6 @@ const Customers = () => {
                     >
                       <HiPencil className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={() => handleDeleteCustomer(customer)}
-                      className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition"
-                      title="Delete customer"
-                    >
-                      <HiTrash className="w-4 h-4" />
-                    </button>
                   </div>
                 </div>
 

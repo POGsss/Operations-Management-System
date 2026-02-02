@@ -54,6 +54,12 @@ const JobOrders = () => {
   const [selectedJob, setSelectedJob] = useState(null);
   const [jobDetails, setJobDetails] = useState(null);
 
+  // Confirmation modal states
+  const [showRemoveEstimateModal, setShowRemoveEstimateModal] = useState(false);
+  const [estimateToRemove, setEstimateToRemove] = useState(null);
+  const [showUnassignModal, setShowUnassignModal] = useState(false);
+  const [mechanicToUnassign, setMechanicToUnassign] = useState(null);
+
   // Form states
   const [formData, setFormData] = useState({
     customer_id: '',
@@ -220,17 +226,31 @@ const JobOrders = () => {
     }
   };
 
-  // Handle remove estimate
-  const handleRemoveEstimate = async (estimateId) => {
-    if (!confirm('Are you sure you want to remove this estimate item?')) return;
+  // Handle remove estimate - open confirmation modal
+  const handleRemoveEstimate = (estimate) => {
+    setEstimateToRemove(estimate);
+    setShowRemoveEstimateModal(true);
+  };
+
+  // Confirm remove estimate
+  const confirmRemoveEstimate = async () => {
+    if (!estimateToRemove) return;
     try {
-      await removeEstimate(session, selectedJob.id, estimateId);
+      await removeEstimate(session, selectedJob.id, estimateToRemove.id);
       const data = await fetchJobById(session, selectedJob.id);
       setJobDetails(data.job);
       loadJobs();
     } catch (err) {
       alert(err.message);
     }
+    setShowRemoveEstimateModal(false);
+    setEstimateToRemove(null);
+  };
+
+  // Cancel remove estimate
+  const cancelRemoveEstimate = () => {
+    setShowRemoveEstimateModal(false);
+    setEstimateToRemove(null);
   };
 
   // Handle assign mechanic
@@ -246,17 +266,31 @@ const JobOrders = () => {
     }
   };
 
-  // Handle unassign mechanic
-  const handleUnassignMechanic = async (mechanicId) => {
-    if (!confirm('Are you sure you want to unassign this mechanic?')) return;
+  // Handle unassign mechanic - open confirmation modal
+  const handleUnassignMechanic = (mechanicId, mechanicName) => {
+    setMechanicToUnassign({ id: mechanicId, name: mechanicName });
+    setShowUnassignModal(true);
+  };
+
+  // Confirm unassign mechanic
+  const confirmUnassignMechanic = async () => {
+    if (!mechanicToUnassign) return;
     try {
-      await unassignMechanic(session, selectedJob.id, mechanicId);
+      await unassignMechanic(session, selectedJob.id, mechanicToUnassign.id);
       const data = await fetchJobById(session, selectedJob.id);
       setJobDetails(data.job);
       loadJobs();
     } catch (err) {
       alert(err.message);
     }
+    setShowUnassignModal(false);
+    setMechanicToUnassign(null);
+  };
+
+  // Cancel unassign mechanic
+  const cancelUnassignMechanic = () => {
+    setShowUnassignModal(false);
+    setMechanicToUnassign(null);
   };
 
   // Format currency
@@ -638,25 +672,16 @@ const JobOrders = () => {
         </div>
       )}
 
-      {/* View Job Modal */}
+      {/* View Job Details Modal */}
       {isViewModalOpen && jobDetails && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
           <div className="fixed inset-0 bg-black opacity-50"></div>
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col z-50">
             {/* Modal Header */}
             <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-black">
-                  Job #{jobDetails.id?.substring(0, 8)}
-                </h2>
-                <span
-                  className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full mt-2 ${
-                    STATUS_COLORS[jobDetails.status] || 'bg-gray-100'
-                  }`}
-                >
-                  {STATUS_LABELS[jobDetails.status] || jobDetails.status}
-                </span>
-              </div>
+              <h2 className="text-2xl font-bold text-black">
+                Job #{jobDetails.id?.substring(0, 8)}
+              </h2>
               <button
                 onClick={() => setIsViewModalOpen(false)}
                 className="text-gray-500 hover:text-gray-700 transition"
@@ -673,15 +698,19 @@ const JobOrders = () => {
                   <div className="space-y-2 text-sm">
                     <p>
                       <span className="text-gray-500">Name:</span>{' '}
-                      <span className="font-medium">{jobDetails.customer?.full_name}</span>
+                      <span className="font-medium">{jobDetails.customer?.full_name || '-'}</span>
                     </p>
                     <p>
                       <span className="text-gray-500">Phone:</span>{' '}
-                      {jobDetails.customer?.phone || '-'}
+                      <span className="font-medium">{jobDetails.customer?.phone || '-'}</span>
                     </p>
                     <p>
                       <span className="text-gray-500">Email:</span>{' '}
-                      {jobDetails.customer?.email || '-'}
+                      <span className="font-medium">{jobDetails.customer?.email || '-'}</span>
+                    </p>
+                    <p>
+                      <span className="text-gray-500">Address:</span>{' '}
+                      <span className="font-medium">{jobDetails.customer?.address || '-'}</span>
                     </p>
                   </div>
                 </div>
@@ -693,11 +722,12 @@ const JobOrders = () => {
                       <span className="font-medium">{jobDetails.vehicle_plate || '-'}</span>
                     </p>
                     <p>
-                      <span className="text-gray-500">VIN:</span> {jobDetails.vehicle_vin || '-'}
+                      <span className="text-gray-500">VIN:</span>{' '}
+                      <span className="font-medium">{jobDetails.vehicle_vin || '-'}</span>
                     </p>
                     <p>
                       <span className="text-gray-500">Odometer:</span>{' '}
-                      {jobDetails.odometer ? `${jobDetails.odometer.toLocaleString()} km` : '-'}
+                      <span className="font-medium">{jobDetails.odometer ? `${jobDetails.odometer.toLocaleString()} km` : '-'}</span>
                     </p>
                   </div>
                 </div>
@@ -709,13 +739,10 @@ const JobOrders = () => {
                   <h3 className="font-semibold text-gray-900">Assigned Mechanics</h3>
                   {['DRAFT', 'ESTIMATED', 'APPROVED'].includes(jobDetails.status) && (
                     <button
-                      onClick={() => {
-                        setIsAssignModalOpen(true);
-                      }}
-                      className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                      onClick={() => setIsAssignModalOpen(true)}
+                      className="text-sm text-blue-600 hover:text-blue-800"
                     >
-                      <HiUserAdd className="w-4 h-4" />
-                      Assign
+                      + Assign Mechanic
                     </button>
                   )}
                 </div>
@@ -734,7 +761,7 @@ const JobOrders = () => {
                         </div>
                         {['DRAFT', 'ESTIMATED'].includes(jobDetails.status) && (
                           <button
-                            onClick={() => handleUnassignMechanic(assignment.mechanic?.id)}
+                            onClick={() => handleUnassignMechanic(assignment.mechanic?.id, assignment.mechanic?.full_name)}
                             className="text-red-500 hover:text-red-700"
                           >
                             <HiX className="w-5 h-5" />
@@ -755,10 +782,9 @@ const JobOrders = () => {
                   {['DRAFT', 'ESTIMATED'].includes(jobDetails.status) && (
                     <button
                       onClick={() => setIsEstimateModalOpen(true)}
-                      className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                      className="text-sm text-blue-600 hover:text-blue-800"
                     >
-                      <HiPlus className="w-4 h-4" />
-                      Add Item
+                      + Add Item
                     </button>
                   )}
                 </div>
@@ -794,7 +820,7 @@ const JobOrders = () => {
                             {['DRAFT', 'ESTIMATED'].includes(jobDetails.status) && (
                               <td className="py-2 text-right">
                                 <button
-                                  onClick={() => handleRemoveEstimate(est.id)}
+                                  onClick={() => handleRemoveEstimate(est)}
                                   className="text-red-500 hover:text-red-700"
                                 >
                                   <HiTrash className="w-4 h-4" />
@@ -822,12 +848,20 @@ const JobOrders = () => {
                 )}
               </div>
 
+              {/* Notes */}
+              {jobDetails.notes && (
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-3">Notes</h3>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{jobDetails.notes}</p>
+                </div>
+              )}
+
               {/* Status History */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="font-semibold text-gray-900 mb-3">Status History</h3>
                 {jobDetails.job_status_history?.length > 0 ? (
                   <div className="space-y-2">
-                    {jobDetails.job_status_history.map((hist, idx) => (
+                    {jobDetails.job_status_history.map((hist) => (
                       <div key={hist.id} className="flex items-center gap-3 text-sm">
                         <div className="w-2 h-2 rounded-full bg-blue-500"></div>
                         <span className="text-gray-500">{formatDate(hist.changed_at)}</span>
@@ -851,9 +885,10 @@ const JobOrders = () => {
             </div>
 
             {/* Footer Actions */}
-            <div className="border-t border-gray-200 p-6 flex justify-between items-center bg-gray-50">
+            <div className="border-t border-gray-200 p-4 flex justify-between items-center">
               <div className="text-sm text-gray-600">
                 Created: {formatDate(jobDetails.created_at)}
+                {jobDetails.creator && ` by ${jobDetails.creator.full_name}`}
               </div>
               <div className="flex gap-3">
                 {jobDetails.status === 'DRAFT' && jobDetails.job_estimates?.length > 0 && (
@@ -1035,6 +1070,98 @@ const JobOrders = () => {
               ) : (
                 <p className="text-center text-gray-600 py-4">No mechanics available</p>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Remove Estimate Confirmation Modal */}
+      {showRemoveEstimateModal && estimateToRemove && (
+        <div className="fixed inset-0 flex items-center justify-center z-[70]">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6 z-[70]">
+            {/* Modal Header */}
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold text-black">Remove Estimate Item</h2>
+            </div>
+
+            {/* Modal Body */}
+            <div className="mb-6">
+              <p className="text-gray-600 text-sm mb-4">
+                Are you sure you want to remove this estimate item?
+              </p>
+              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Item:</span>{' '}
+                  {estimateToRemove.item_name}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Type:</span>{' '}
+                  {estimateToRemove.item_type}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Total:</span>{' '}
+                  {formatCurrency(estimateToRemove.total_price)}
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex gap-3">
+              <button
+                onClick={cancelRemoveEstimate}
+                className="flex-1 px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmRemoveEstimate}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-medium"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Unassign Mechanic Confirmation Modal */}
+      {showUnassignModal && mechanicToUnassign && (
+        <div className="fixed inset-0 flex items-center justify-center z-[70]">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6 z-[70]">
+            {/* Modal Header */}
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold text-black">Unassign Mechanic</h2>
+            </div>
+
+            {/* Modal Body */}
+            <div className="mb-6">
+              <p className="text-gray-600 text-sm mb-4">
+                Are you sure you want to unassign this mechanic from the job?
+              </p>
+              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Mechanic:</span>{' '}
+                  {mechanicToUnassign.name || 'Unknown'}
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex gap-3">
+              <button
+                onClick={cancelUnassignMechanic}
+                className="flex-1 px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmUnassignMechanic}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-medium"
+              >
+                Unassign
+              </button>
             </div>
           </div>
         </div>
