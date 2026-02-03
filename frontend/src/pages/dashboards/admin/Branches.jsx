@@ -839,7 +839,7 @@ const Branches = () => {
                     setIsModalOpen(false);
                     setEditingBranch(null);
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 transition"
+                  className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium"
                 >
                   Cancel
                 </button>
