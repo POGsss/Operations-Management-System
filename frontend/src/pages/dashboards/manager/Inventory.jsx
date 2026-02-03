@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import MetricCard from '../../../components/MetricCard';
+import { HiCube, HiCurrencyDollar, HiExclamationCircle, HiXCircle } from 'react-icons/hi';
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -89,22 +90,22 @@ const Inventory = () => {
         <MetricCard
           title="Total Items"
           value={inventoryValue?.total_items || inventory.length}
-          icon="📦"
+          icon={<HiCube className="w-6 h-6" />}
         />
         <MetricCard
           title="Total Value"
           value={formatCurrency(inventoryValue?.total_value)}
-          icon="💵"
+          icon={<HiCurrencyDollar className="w-6 h-6" />}
         />
         <MetricCard
           title="Low Stock"
           value={lowStockCount}
-          icon="⚠️"
+          icon={<HiExclamationCircle className="w-6 h-6" />}
         />
         <MetricCard
           title="Out of Stock"
           value={outOfStockCount}
-          icon="❌"
+          icon={<HiXCircle className="w-6 h-6" />}
         />
       </div>
 

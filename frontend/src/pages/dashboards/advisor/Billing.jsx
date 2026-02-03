@@ -514,120 +514,130 @@ const Billing = () => {
 
       {/* Invoice Detail Modal */}
       {showDetailModal && detailInvoice && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 overflow-y-auto py-8">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl m-4">
-            <div className="flex items-center justify-between p-6 border-b">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] z-50 flex flex-col">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between flex-shrink-0">
               <div>
-                <h3 className="text-xl font-semibold">{detailInvoice.invoice_number}</h3>
+                <h2 className="text-2xl font-bold text-black">{detailInvoice.invoice_number}</h2>
                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs mt-1 ${STATUS_CONFIG[detailInvoice.status]?.color}`}>
                   {STATUS_CONFIG[detailInvoice.status]?.label}
                 </span>
               </div>
-              <button onClick={() => setShowDetailModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <HiX className="w-5 h-5" />
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="text-gray-500 hover:text-gray-700 transition"
+              >
+                <HiX className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
-              {/* Customer & Invoice Info */}
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-medium mb-2">Bill To</h4>
-                  <p className="text-gray-800">{detailInvoice.customer_name}</p>
-                  {detailInvoice.customer_email && <p className="text-sm text-gray-600">{detailInvoice.customer_email}</p>}
-                  {detailInvoice.customer_phone && <p className="text-sm text-gray-600">{detailInvoice.customer_phone}</p>}
-                  {detailInvoice.customer_address && <p className="text-sm text-gray-600">{detailInvoice.customer_address}</p>}
+            {/* Modal Body - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-6">
+                {/* Customer & Invoice Info */}
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-medium mb-2">Bill To</h4>
+                    <p className="text-gray-800">{detailInvoice.customer_name}</p>
+                    {detailInvoice.customer_email && <p className="text-sm text-gray-600">{detailInvoice.customer_email}</p>}
+                    {detailInvoice.customer_phone && <p className="text-sm text-gray-600">{detailInvoice.customer_phone}</p>}
+                    {detailInvoice.customer_address && <p className="text-sm text-gray-600">{detailInvoice.customer_address}</p>}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-600">Invoice Date: <span className="text-gray-800">{formatDate(detailInvoice.invoice_date)}</span></p>
+                    <p className="text-sm text-gray-600">Due Date: <span className="text-gray-800">{formatDate(detailInvoice.due_date)}</span></p>
+                    {detailInvoice.vehicle_info && <p className="text-sm text-gray-600 mt-2">Vehicle: <span className="text-gray-800">{detailInvoice.vehicle_info}</span></p>}
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-600">Invoice Date: <span className="text-gray-800">{formatDate(detailInvoice.invoice_date)}</span></p>
-                  <p className="text-sm text-gray-600">Due Date: <span className="text-gray-800">{formatDate(detailInvoice.due_date)}</span></p>
-                  {detailInvoice.vehicle_info && <p className="text-sm text-gray-600 mt-2">Vehicle: <span className="text-gray-800">{detailInvoice.vehicle_info}</span></p>}
-                </div>
-              </div>
 
-              {/* Line Items */}
-              <div>
-                <h4 className="font-medium mb-2">Items</h4>
-                <table className="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-3 py-2 text-left">Description</th>
-                      <th className="px-3 py-2 text-right">Qty</th>
-                      <th className="px-3 py-2 text-right">Price</th>
-                      <th className="px-3 py-2 text-right">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {(detailInvoice.items || []).map(item => (
-                      <tr key={item.id}>
-                        <td className="px-3 py-2">
-                          <span className={`text-xs px-1.5 py-0.5 rounded mr-2 ${item.item_type === 'labor' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}>
-                            {item.item_type}
-                          </span>
-                          {item.name}
-                        </td>
-                        <td className="px-3 py-2 text-right">{item.quantity}</td>
-                        <td className="px-3 py-2 text-right">{formatCurrency(item.unit_price)}</td>
-                        <td className="px-3 py-2 text-right font-medium">{formatCurrency(item.line_total)}</td>
+                {/* Line Items */}
+                <div>
+                  <h4 className="font-medium mb-2">Items</h4>
+                  <table className="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Description</th>
+                        <th className="px-3 py-2 text-right">Qty</th>
+                        <th className="px-3 py-2 text-right">Price</th>
+                        <th className="px-3 py-2 text-right">Total</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {(detailInvoice.items || []).map(item => (
+                        <tr key={item.id}>
+                          <td className="px-3 py-2">
+                            <span className={`text-xs px-1.5 py-0.5 rounded mr-2 ${item.item_type === 'labor' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}>
+                              {item.item_type}
+                            </span>
+                            {item.name}
+                          </td>
+                          <td className="px-3 py-2 text-right">{item.quantity}</td>
+                          <td className="px-3 py-2 text-right">{formatCurrency(item.unit_price)}</td>
+                          <td className="px-3 py-2 text-right font-medium">{formatCurrency(item.line_total)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
 
-              {/* Totals */}
-              <div className="flex justify-end">
-                <div className="w-64 space-y-1 text-sm">
-                  <div className="flex justify-between"><span>Labor:</span><span>{formatCurrency(detailInvoice.labor_total)}</span></div>
-                  <div className="flex justify-between"><span>Parts:</span><span>{formatCurrency(detailInvoice.parts_total)}</span></div>
-                  {parseFloat(detailInvoice.discount_amount) > 0 && <div className="flex justify-between text-red-600"><span>Discount:</span><span>-{formatCurrency(detailInvoice.discount_amount)}</span></div>}
-                  <div className="flex justify-between border-t pt-1"><span>Subtotal:</span><span>{formatCurrency(detailInvoice.subtotal)}</span></div>
-                  <div className="flex justify-between"><span>Tax ({(parseFloat(detailInvoice.tax_rate || 0) * 100).toFixed(1)}%):</span><span>{formatCurrency(detailInvoice.tax_amount)}</span></div>
-                  <div className="flex justify-between font-bold text-lg border-t pt-1"><span>Total:</span><span>{formatCurrency(detailInvoice.total_amount)}</span></div>
-                  <div className="flex justify-between text-green-600"><span>Paid:</span><span>{formatCurrency(detailInvoice.amount_paid)}</span></div>
-                  <div className={`flex justify-between font-bold ${parseFloat(detailInvoice.balance_due) > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                    <span>Balance Due:</span><span>{formatCurrency(detailInvoice.balance_due)}</span>
+                {/* Totals */}
+                <div className="flex justify-end">
+                  <div className="w-64 space-y-1 text-sm">
+                    <div className="flex justify-between"><span>Labor:</span><span>{formatCurrency(detailInvoice.labor_total)}</span></div>
+                    <div className="flex justify-between"><span>Parts:</span><span>{formatCurrency(detailInvoice.parts_total)}</span></div>
+                    {parseFloat(detailInvoice.discount_amount) > 0 && <div className="flex justify-between text-red-600"><span>Discount:</span><span>-{formatCurrency(detailInvoice.discount_amount)}</span></div>}
+                    <div className="flex justify-between border-t pt-1"><span>Subtotal:</span><span>{formatCurrency(detailInvoice.subtotal)}</span></div>
+                    <div className="flex justify-between"><span>Tax ({(parseFloat(detailInvoice.tax_rate || 0) * 100).toFixed(1)}%):</span><span>{formatCurrency(detailInvoice.tax_amount)}</span></div>
+                    <div className="flex justify-between font-bold text-lg border-t pt-1"><span>Total:</span><span>{formatCurrency(detailInvoice.total_amount)}</span></div>
+                    <div className="flex justify-between text-green-600"><span>Paid:</span><span>{formatCurrency(detailInvoice.amount_paid)}</span></div>
+                    <div className={`flex justify-between font-bold ${parseFloat(detailInvoice.balance_due) > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      <span>Balance Due:</span><span>{formatCurrency(detailInvoice.balance_due)}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Payments */}
-              {detailInvoice.payments && detailInvoice.payments.length > 0 && (
-                <div>
-                  <h4 className="font-medium mb-2">Payment History</h4>
-                  <div className="space-y-2">
-                    {detailInvoice.payments.map(p => (
-                      <div key={p.id} className="flex items-center justify-between text-sm bg-green-50 p-2 rounded">
-                        <div>
-                          <span className="font-medium">{p.payment_number}</span>
-                          <span className="mx-2 text-gray-600">•</span>
-                          <span className="capitalize">{p.payment_method.replace('_', ' ')}</span>
-                          {p.reference_number && <span className="ml-2 text-gray-500">Ref: {p.reference_number}</span>}
+                {/* Payments */}
+                {detailInvoice.payments && detailInvoice.payments.length > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-2">Payment History</h4>
+                    <div className="space-y-2">
+                      {detailInvoice.payments.map(p => (
+                        <div key={p.id} className="flex items-center justify-between text-sm bg-green-50 p-2 rounded">
+                          <div>
+                            <span className="font-medium">{p.payment_number}</span>
+                            <span className="mx-2 text-gray-600">•</span>
+                            <span className="capitalize">{p.payment_method.replace('_', ' ')}</span>
+                            {p.reference_number && <span className="ml-2 text-gray-500">Ref: {p.reference_number}</span>}
+                          </div>
+                          <div className="flex items-center space-x-4">
+                            <span className="font-semibold text-green-600">{formatCurrency(p.amount)}</span>
+                            <span className="text-gray-500">{formatDate(p.payment_date)}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-4">
-                          <span className="font-semibold text-green-600">{formatCurrency(p.amount)}</span>
-                          <span className="text-gray-500">{formatDate(p.payment_date)}</span>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex justify-end space-x-3 p-6 border-t">
+            {/* Modal Footer */}
+            <div className="flex justify-end space-x-3 p-6 border-t bg-white flex-shrink-0">
               {detailInvoice.status === 'draft' && (
-                <button onClick={() => { handleSendInvoice(detailInvoice); setShowDetailModal(false); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <button onClick={() => { handleSendInvoice(detailInvoice); setShowDetailModal(false); }} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium">
                   Send Invoice
                 </button>
               )}
               {['sent', 'partial', 'overdue'].includes(detailInvoice.status) && parseFloat(detailInvoice.balance_due) > 0 && (
-                <button onClick={() => { openPaymentModal(detailInvoice); }} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                <button onClick={() => { openPaymentModal(detailInvoice); }} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-medium">
                   Record Payment
                 </button>
               )}
-              <button onClick={() => setShowDetailModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Close</button>
+              <button onClick={() => setShowDetailModal(false)} className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium">
+                Close
+              </button>
             </div>
           </div>
         </div>
@@ -635,80 +645,92 @@ const Billing = () => {
 
       {/* Payment Modal */}
       {showPaymentModal && selectedInvoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 m-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Record Payment</h3>
-              <button onClick={() => setShowPaymentModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <HiX className="w-5 h-5" />
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg z-50 flex flex-col">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between flex-shrink-0">
+              <h2 className="text-2xl font-bold text-black">Record Payment</h2>
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                className="text-gray-500 hover:text-gray-700 transition"
+              >
+                <HiX className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600">Invoice: <span className="font-medium text-gray-800">{selectedInvoice.invoice_number}</span></p>
-              <p className="text-sm text-gray-600">Customer: <span className="font-medium text-gray-800">{selectedInvoice.customer_name || selectedInvoice.customer?.full_name}</span></p>
-              <p className="text-sm text-gray-600">Balance Due: <span className="font-medium text-red-600">{formatCurrency(selectedInvoice.balance_due)}</span></p>
-            </div>
+            {/* Modal Body */}
+            <div className="p-6">
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600">Invoice: <span className="font-medium text-gray-800">{selectedInvoice.invoice_number}</span></p>
+                <p className="text-sm text-gray-600">Customer: <span className="font-medium text-gray-800">{selectedInvoice.customer_name || selectedInvoice.customer?.full_name}</span></p>
+                <p className="text-sm text-gray-600">Balance Due: <span className="font-medium text-red-600">{formatCurrency(selectedInvoice.balance_due)}</span></p>
+              </div>
 
-            <form onSubmit={handleRecordPayment} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Amount *</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  max={parseFloat(selectedInvoice.balance_due)}
-                  value={paymentForm.amount}
-                  onChange={(e) => setPaymentForm(f => ({ ...f, amount: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method *</label>
-                <select
-                  value={paymentForm.payment_method}
-                  onChange={(e) => setPaymentForm(f => ({ ...f, payment_method: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  required
-                >
-                  {PAYMENT_METHODS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Date</label>
-                <input
-                  type="date"
-                  value={paymentForm.payment_date}
-                  onChange={(e) => setPaymentForm(f => ({ ...f, payment_date: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Reference Number</label>
-                <input
-                  type="text"
-                  value={paymentForm.reference_number}
-                  onChange={(e) => setPaymentForm(f => ({ ...f, reference_number: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  placeholder="Check #, Auth code, etc."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                <textarea
-                  value={paymentForm.notes}
-                  onChange={(e) => setPaymentForm(f => ({ ...f, notes: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  rows={2}
-                />
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button type="button" onClick={() => setShowPaymentModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-                <button type="submit" disabled={saving} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50">
-                  {saving ? 'Recording...' : 'Record Payment'}
-                </button>
-              </div>
-            </form>
+              <form onSubmit={handleRecordPayment} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Amount *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    max={parseFloat(selectedInvoice.balance_due)}
+                    value={paymentForm.amount}
+                    onChange={(e) => setPaymentForm(f => ({ ...f, amount: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Payment Method *</label>
+                  <select
+                    value={paymentForm.payment_method}
+                    onChange={(e) => setPaymentForm(f => ({ ...f, payment_method: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
+                    required
+                  >
+                    {PAYMENT_METHODS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Payment Date</label>
+                  <input
+                    type="date"
+                    value={paymentForm.payment_date}
+                    onChange={(e) => setPaymentForm(f => ({ ...f, payment_date: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Reference Number</label>
+                  <input
+                    type="text"
+                    value={paymentForm.reference_number}
+                    onChange={(e) => setPaymentForm(f => ({ ...f, reference_number: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
+                    placeholder="Check #, Auth code, etc."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                  <textarea
+                    value={paymentForm.notes}
+                    onChange={(e) => setPaymentForm(f => ({ ...f, notes: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
+                    rows={2}
+                  />
+                </div>
+
+                {/* Modal Footer */}
+                <div className="pt-4 flex justify-end space-x-3">
+                  <button type="button" onClick={() => setShowPaymentModal(false)} className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium">
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={saving} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                    {saving ? 'Recording...' : 'Record Payment'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

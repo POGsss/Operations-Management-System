@@ -648,44 +648,61 @@ const PricingMatrix = () => {
 
       {/* Package Modal */}
       {isPackageModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 m-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">{editingItem ? 'Edit Package' : 'Add Package'}</h3>
-              <button onClick={() => setIsPackageModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg"><HiX className="w-5 h-5" /></button>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-xl z-50">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-black">
+                {editingItem ? 'Edit Package' : 'Add Package'}
+              </h2>
+              <button
+                onClick={() => setIsPackageModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700 transition"
+              >
+                <HiX className="w-6 h-6" />
+              </button>
             </div>
-            <form onSubmit={handleSavePackage} className="space-y-4">
+
+            {/* Modal Body */}
+            <form onSubmit={handleSavePackage} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-                <input type="text" value={packageForm.name} onChange={(e) => setPackageForm(p => ({ ...p, name: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
+                <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
+                <input type="text" value={packageForm.name} onChange={(e) => setPackageForm(p => ({ ...p, name: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" required />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
-                <select value={packageForm.category} onChange={(e) => setPackageForm(p => ({ ...p, category: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                <select value={packageForm.category} onChange={(e) => setPackageForm(p => ({ ...p, category: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900">
                   {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Base Price *</label>
-                  <input type="number" step="0.01" value={packageForm.base_price} onChange={(e) => setPackageForm(p => ({ ...p, base_price: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Base Price *</label>
+                  <input type="number" step="0.01" value={packageForm.base_price} onChange={(e) => setPackageForm(p => ({ ...p, base_price: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Est. Hours</label>
-                  <input type="number" step="0.5" value={packageForm.estimated_hours} onChange={(e) => setPackageForm(p => ({ ...p, estimated_hours: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Est. Hours</label>
+                  <input type="number" step="0.5" value={packageForm.estimated_hours} onChange={(e) => setPackageForm(p => ({ ...p, estimated_hours: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea value={packageForm.description} onChange={(e) => setPackageForm(p => ({ ...p, description: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" rows={2} />
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea value={packageForm.description} onChange={(e) => setPackageForm(p => ({ ...p, description: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900 resize-none" rows={2} />
               </div>
               <div className="flex items-center">
-                <input type="checkbox" id="pkg-active" checked={packageForm.is_active} onChange={(e) => setPackageForm(p => ({ ...p, is_active: e.target.checked }))} className="h-4 w-4 rounded border-gray-300" />
+                <input type="checkbox" id="pkg-active" checked={packageForm.is_active} onChange={(e) => setPackageForm(p => ({ ...p, is_active: e.target.checked }))} className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black" />
                 <label htmlFor="pkg-active" className="ml-2 text-sm text-gray-700">Active</label>
               </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button type="button" onClick={() => setIsPackageModalOpen(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-                <button type="submit" disabled={saving} className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50">{saving ? 'Saving...' : 'Save'}</button>
+
+              {/* Modal Footer */}
+              <div className="pt-4 flex justify-end space-x-3">
+                <button type="button" onClick={() => setIsPackageModalOpen(false)} className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium">
+                  Cancel
+                </button>
+                <button type="submit" disabled={saving} className="px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
               </div>
             </form>
           </div>
@@ -694,49 +711,66 @@ const PricingMatrix = () => {
 
       {/* Labor Rate Modal */}
       {isLaborRateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 m-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">{editingItem ? 'Edit Labor Rate' : 'Add Labor Rate'}</h3>
-              <button onClick={() => setIsLaborRateModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg"><HiX className="w-5 h-5" /></button>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-xl z-50">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-black">
+                {editingItem ? 'Edit Labor Rate' : 'Add Labor Rate'}
+              </h2>
+              <button
+                onClick={() => setIsLaborRateModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700 transition"
+              >
+                <HiX className="w-6 h-6" />
+              </button>
             </div>
-            <form onSubmit={handleSaveLaborRate} className="space-y-4">
+
+            {/* Modal Body */}
+            <form onSubmit={handleSaveLaborRate} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Branch *</label>
-                <select value={laborRateForm.branch_id} onChange={(e) => setLaborRateForm(p => ({ ...p, branch_id: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" required disabled={!!editingItem}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Branch *</label>
+                <select value={laborRateForm.branch_id} onChange={(e) => setLaborRateForm(p => ({ ...p, branch_id: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" required disabled={!!editingItem}>
                   <option value="">Select branch...</option>
                   {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-                  <input type="text" value={laborRateForm.name} onChange={(e) => setLaborRateForm(p => ({ ...p, name: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
+                  <input type="text" value={laborRateForm.name} onChange={(e) => setLaborRateForm(p => ({ ...p, name: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Hourly Rate *</label>
-                  <input type="number" step="0.01" value={laborRateForm.hourly_rate} onChange={(e) => setLaborRateForm(p => ({ ...p, hourly_rate: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Hourly Rate *</label>
+                  <input type="number" step="0.01" value={laborRateForm.hourly_rate} onChange={(e) => setLaborRateForm(p => ({ ...p, hourly_rate: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" required />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Skill Level</label>
-                <select value={laborRateForm.skill_level} onChange={(e) => setLaborRateForm(p => ({ ...p, skill_level: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Skill Level</label>
+                <select value={laborRateForm.skill_level} onChange={(e) => setLaborRateForm(p => ({ ...p, skill_level: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900">
                   {SKILL_LEVELS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
               </div>
               <div className="flex space-x-6">
                 <div className="flex items-center">
-                  <input type="checkbox" id="rate-default" checked={laborRateForm.is_default} onChange={(e) => setLaborRateForm(p => ({ ...p, is_default: e.target.checked }))} className="h-4 w-4 rounded border-gray-300" />
+                  <input type="checkbox" id="rate-default" checked={laborRateForm.is_default} onChange={(e) => setLaborRateForm(p => ({ ...p, is_default: e.target.checked }))} className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black" />
                   <label htmlFor="rate-default" className="ml-2 text-sm text-gray-700">Default Rate</label>
                 </div>
                 <div className="flex items-center">
-                  <input type="checkbox" id="rate-active" checked={laborRateForm.is_active} onChange={(e) => setLaborRateForm(p => ({ ...p, is_active: e.target.checked }))} className="h-4 w-4 rounded border-gray-300" />
+                  <input type="checkbox" id="rate-active" checked={laborRateForm.is_active} onChange={(e) => setLaborRateForm(p => ({ ...p, is_active: e.target.checked }))} className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black" />
                   <label htmlFor="rate-active" className="ml-2 text-sm text-gray-700">Active</label>
                 </div>
               </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button type="button" onClick={() => setIsLaborRateModalOpen(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-                <button type="submit" disabled={saving} className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50">{saving ? 'Saving...' : 'Save'}</button>
+
+              {/* Modal Footer */}
+              <div className="pt-4 flex justify-end space-x-3">
+                <button type="button" onClick={() => setIsLaborRateModalOpen(false)} className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium">
+                  Cancel
+                </button>
+                <button type="submit" disabled={saving} className="px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
               </div>
             </form>
           </div>
@@ -745,108 +779,144 @@ const PricingMatrix = () => {
 
       {/* Pricing Rule Modal */}
       {isRuleModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 m-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">{editingItem ? 'Edit Pricing Rule' : 'Add Pricing Rule'}</h3>
-              <button onClick={() => setIsRuleModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg"><HiX className="w-5 h-5" /></button>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] z-50 flex flex-col">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between flex-shrink-0">
+              <h2 className="text-2xl font-bold text-black">
+                {editingItem ? 'Edit Pricing Rule' : 'Add Pricing Rule'}
+              </h2>
+              <button
+                onClick={() => setIsRuleModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700 transition"
+              >
+                <HiX className="w-6 h-6" />
+              </button>
             </div>
-            <form onSubmit={handleSaveRule} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Branch *</label>
-                <select value={ruleForm.branch_id} onChange={(e) => setRuleForm(p => ({ ...p, branch_id: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" required disabled={!!editingItem}>
-                  <option value="">Select branch...</option>
-                  {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-                <input type="text" value={ruleForm.name} onChange={(e) => setRuleForm(p => ({ ...p, name: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+
+            {/* Modal Body - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <form onSubmit={handleSaveRule} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Rule Type *</label>
-                  <select value={ruleForm.rule_type} onChange={(e) => setRuleForm(p => ({ ...p, rule_type: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2">
-                    {RULE_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Branch *</label>
+                  <select value={ruleForm.branch_id} onChange={(e) => setRuleForm(p => ({ ...p, branch_id: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" required disabled={!!editingItem}>
+                    <option value="">Select branch...</option>
+                    {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Applies To *</label>
-                  <select value={ruleForm.applies_to} onChange={(e) => setRuleForm(p => ({ ...p, applies_to: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2">
-                    {APPLIES_TO.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
-                  </select>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
+                  <input type="text" value={ruleForm.name} onChange={(e) => setRuleForm(p => ({ ...p, name: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" required />
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Value *</label>
-                  <input type="number" step="0.01" value={ruleForm.value} onChange={(e) => setRuleForm(p => ({ ...p, value: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Rule Type *</label>
+                    <select value={ruleForm.rule_type} onChange={(e) => setRuleForm(p => ({ ...p, rule_type: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900">
+                      {RULE_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Applies To *</label>
+                    <select value={ruleForm.applies_to} onChange={(e) => setRuleForm(p => ({ ...p, applies_to: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900">
+                      {APPLIES_TO.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
+                    </select>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Value Type *</label>
-                  <select value={ruleForm.value_type} onChange={(e) => setRuleForm(p => ({ ...p, value_type: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2">
-                    <option value="percentage">Percentage (%)</option>
-                    <option value="fixed">Fixed Amount ($)</option>
-                  </select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Value *</label>
+                    <input type="number" step="0.01" value={ruleForm.value} onChange={(e) => setRuleForm(p => ({ ...p, value: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Value Type *</label>
+                    <select value={ruleForm.value_type} onChange={(e) => setRuleForm(p => ({ ...p, value_type: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900">
+                      <option value="percentage">Percentage (%)</option>
+                      <option value="fixed">Fixed Amount ($)</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Min Amount</label>
-                  <input type="number" step="0.01" value={ruleForm.min_amount} onChange={(e) => setRuleForm(p => ({ ...p, min_amount: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Min Amount</label>
+                    <input type="number" step="0.01" value={ruleForm.min_amount} onChange={(e) => setRuleForm(p => ({ ...p, min_amount: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Max Amount</label>
+                    <input type="number" step="0.01" value={ruleForm.max_amount} onChange={(e) => setRuleForm(p => ({ ...p, max_amount: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" placeholder="No limit" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                    <input type="number" value={ruleForm.priority} onChange={(e) => setRuleForm(p => ({ ...p, priority: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Max Amount</label>
-                  <input type="number" step="0.01" value={ruleForm.max_amount} onChange={(e) => setRuleForm(p => ({ ...p, max_amount: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="No limit" />
+                <div className="flex items-center">
+                  <input type="checkbox" id="rule-active" checked={ruleForm.is_active} onChange={(e) => setRuleForm(p => ({ ...p, is_active: e.target.checked }))} className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black" />
+                  <label htmlFor="rule-active" className="ml-2 text-sm text-gray-700">Active</label>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-                  <input type="number" value={ruleForm.priority} onChange={(e) => setRuleForm(p => ({ ...p, priority: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+
+                {/* Modal Footer */}
+                <div className="pt-4 flex justify-end space-x-3">
+                  <button type="button" onClick={() => setIsRuleModalOpen(false)} className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium">
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={saving} className="px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                    {saving ? 'Saving...' : 'Save'}
+                  </button>
                 </div>
-              </div>
-              <div className="flex items-center">
-                <input type="checkbox" id="rule-active" checked={ruleForm.is_active} onChange={(e) => setRuleForm(p => ({ ...p, is_active: e.target.checked }))} className="h-4 w-4 rounded border-gray-300" />
-                <label htmlFor="rule-active" className="ml-2 text-sm text-gray-700">Active</label>
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button type="button" onClick={() => setIsRuleModalOpen(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-                <button type="submit" disabled={saving} className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50">{saving ? 'Saving...' : 'Save'}</button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Branch Pricing Modal */}
       {isBranchPricingModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 m-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Override Package Pricing</h3>
-              <button onClick={() => setIsBranchPricingModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg"><HiX className="w-5 h-5" /></button>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-xl z-50 flex flex-col">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between flex-shrink-0">
+              <h2 className="text-2xl font-bold text-black">
+                Override Package Pricing
+              </h2>
+              <button
+                onClick={() => setIsBranchPricingModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700 transition"
+              >
+                <HiX className="w-6 h-6" />
+              </button>
             </div>
-            <form onSubmit={handleSaveBranchPricing} className="space-y-4">
+
+            {/* Modal Body */}
+            <form onSubmit={handleSaveBranchPricing} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Branch *</label>
-                <select value={branchPricingForm.branch_id} onChange={(e) => setBranchPricingForm(p => ({ ...p, branch_id: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Branch *</label>
+                <select value={branchPricingForm.branch_id} onChange={(e) => setBranchPricingForm(p => ({ ...p, branch_id: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" required>
                   <option value="">Select branch...</option>
                   {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Package *</label>
-                <select value={branchPricingForm.package_id} onChange={(e) => setBranchPricingForm(p => ({ ...p, package_id: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Package *</label>
+                <select value={branchPricingForm.package_id} onChange={(e) => setBranchPricingForm(p => ({ ...p, package_id: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" required>
                   <option value="">Select package...</option>
                   {packages.map(p => <option key={p.id} value={p.id}>{p.name} ({formatCurrency(p.base_price)})</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Override Price *</label>
-                <input type="number" step="0.01" value={branchPricingForm.price_override} onChange={(e) => setBranchPricingForm(p => ({ ...p, price_override: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
+                <label className="block text-sm font-medium text-gray-700 mb-2">Override Price *</label>
+                <input type="number" step="0.01" value={branchPricingForm.price_override} onChange={(e) => setBranchPricingForm(p => ({ ...p, price_override: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" required />
               </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button type="button" onClick={() => setIsBranchPricingModalOpen(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-                <button type="submit" disabled={saving} className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50">{saving ? 'Saving...' : 'Save'}</button>
+
+              {/* Modal Footer */}
+              <div className="pt-4 flex justify-end space-x-3">
+                <button type="button" onClick={() => setIsBranchPricingModalOpen(false)} className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium">
+                  Cancel
+                </button>
+                <button type="submit" disabled={saving} className="px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
               </div>
             </form>
           </div>
@@ -855,16 +925,44 @@ const PricingMatrix = () => {
 
       {/* Delete Confirmation */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 m-4">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="p-2 bg-red-100 rounded-full"><HiExclamation className="w-6 h-6 text-red-600" /></div>
-              <h3 className="text-lg font-semibold">Confirm Delete</h3>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md z-50 flex flex-col">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between flex-shrink-0">
+              <h2 className="text-2xl font-bold text-black">
+                Confirm Delete
+              </h2>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="text-gray-500 hover:text-gray-700 transition"
+              >
+                <HiX className="w-6 h-6" />
+              </button>
             </div>
-            <p className="text-gray-600 mb-6">Are you sure you want to delete this item? This action cannot be undone.</p>
-            <div className="flex justify-end space-x-3">
-              <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-              <button onClick={handleDelete} disabled={saving} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50">{saving ? 'Deleting...' : 'Delete'}</button>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="p-2 bg-red-100 rounded-full">
+                  <HiExclamation className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Delete Item</h3>
+                  <p className="text-gray-600">This action cannot be undone.</p>
+                </div>
+              </div>
+              <p className="text-gray-600 mb-6">Are you sure you want to delete this item? This action cannot be undone.</p>
+
+              {/* Modal Footer */}
+              <div className="flex justify-end space-x-3">
+                <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium">
+                  Cancel
+                </button>
+                <button onClick={handleDelete} disabled={saving} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                  {saving ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

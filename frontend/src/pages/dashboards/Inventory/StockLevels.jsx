@@ -311,7 +311,7 @@ const StockLevels = () => {
     }
   };
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.role === 'inventory_officer';
 
   return (
     <div className="space-y-8">
@@ -573,7 +573,7 @@ const StockLevels = () => {
                 />
               </div>
             </div>
-            <div className="border-t border-gray-200 p-4 flex justify-end gap-3">
+            <div className="p-4 flex justify-end gap-3">
               <button
                 onClick={() => setIsAdjustModalOpen(false)}
                 className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium"
@@ -636,7 +636,7 @@ const StockLevels = () => {
                 />
               </div>
             </div>
-            <div className="border-t border-gray-200 p-4 flex justify-end gap-3">
+            <div className="p-4 flex justify-end gap-3">
               <button
                 onClick={() => setIsEditModalOpen(false)}
                 className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium"
@@ -743,7 +743,7 @@ const StockLevels = () => {
                   />
                 </div>
               </div>
-              <div className="border-t border-gray-200 pt-4 flex justify-end gap-3">
+              <div className="pt-4 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
@@ -772,7 +772,7 @@ const StockLevels = () => {
               <h3 className="text-lg font-bold text-black mb-2">{confirmAction.title}</h3>
               <p className="text-gray-600">{confirmAction.message}</p>
             </div>
-            <div className="border-t border-gray-200 p-4 flex justify-end gap-3">
+            <div className="p-4 flex justify-end gap-3">
               <button
                 onClick={() => setShowConfirmDialog(false)}
                 className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium"

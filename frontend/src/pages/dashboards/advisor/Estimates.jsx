@@ -687,194 +687,211 @@ const Estimates = () => {
 
       {/* Create/Edit Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 overflow-y-auto py-8">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl m-4">
-            <div className="flex items-center justify-between p-6 border-b">
-              <h3 className="text-xl font-semibold">{selectedEstimate ? 'Edit Estimate' : 'Create Estimate'}</h3>
-              <button onClick={() => setShowCreateModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <HiX className="w-5 h-5" />
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] z-50 flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
+              <h2 className="text-2xl font-bold text-black">
+                {selectedEstimate ? 'Edit Estimate' : 'Create Estimate'}
+              </h2>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="text-gray-500 hover:text-gray-700 transition"
+              >
+                <HiX className="w-6 h-6" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveEstimate} className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
-              {/* Customer & Vehicle Section */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h4 className="font-medium flex items-center"><HiUser className="w-5 h-5 mr-2" />Customer</h4>
-                  <select
-                    value={estimateForm.customer_id}
-                    onChange={(e) => handleCustomerChange(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    required
-                  >
-                    <option value="">Select customer...</option>
-                    {customers.map(c => (
-                      <option key={c.id} value={c.id}>{c.full_name} {c.phone ? `(${c.phone})` : ''}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-4">
-                  <h4 className="font-medium flex items-center"><HiTruck className="w-5 h-5 mr-2" />Vehicle</h4>
-                  <select
-                    value={estimateForm.vehicle_id}
-                    onChange={(e) => handleVehicleChange(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  >
-                    <option value="">Select or enter manually...</option>
-                    {customerVehicles.map(v => (
-                      <option key={v.id} value={v.id}>{v.year} {v.make} {v.model} ({v.license_plate || v.vin || 'No plate'})</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Vehicle Details */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Make</label>
-                  <input type="text" value={estimateForm.vehicle_make} onChange={(e) => setEstimateForm(f => ({ ...f, vehicle_make: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Model</label>
-                  <input type="text" value={estimateForm.vehicle_model} onChange={(e) => setEstimateForm(f => ({ ...f, vehicle_model: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
-                  <input type="number" value={estimateForm.vehicle_year} onChange={(e) => setEstimateForm(f => ({ ...f, vehicle_year: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">VIN</label>
-                  <input type="text" value={estimateForm.vehicle_vin} onChange={(e) => setEstimateForm(f => ({ ...f, vehicle_vin: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">License Plate</label>
-                  <input type="text" value={estimateForm.vehicle_license_plate} onChange={(e) => setEstimateForm(f => ({ ...f, vehicle_license_plate: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Mileage</label>
-                  <input type="number" value={estimateForm.vehicle_mileage} onChange={(e) => setEstimateForm(f => ({ ...f, vehicle_mileage: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
-                </div>
-              </div>
-
-              {/* Customer Concern */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Customer Concern</label>
-                <textarea value={estimateForm.customer_concern} onChange={(e) => setEstimateForm(f => ({ ...f, customer_concern: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" rows={2} />
-              </div>
-
-              {/* Line Items */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium">Line Items</h4>
-                  <div className="flex space-x-2">
-                    <select onChange={(e) => { if (e.target.value) addPackageToEstimate(packages.find(p => p.id === e.target.value)); e.target.value = ''; }} className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
-                      <option value="">Add Package...</option>
-                      {packages.map(p => (<option key={p.id} value={p.id}>{p.name} ({formatCurrency(p.base_price)})</option>))}
-                    </select>
-                    <button type="button" onClick={() => setShowAddItem(true)} className="flex items-center space-x-1 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-sm">
-                      <HiPlus className="w-4 h-4" /><span>Add Item</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Items Table */}
-                <div className="border border-gray-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-3 py-2 text-left">Type</th>
-                        <th className="px-3 py-2 text-left">Description</th>
-                        <th className="px-3 py-2 text-right">Qty</th>
-                        <th className="px-3 py-2 text-right">Unit Price</th>
-                        <th className="px-3 py-2 text-right">Total</th>
-                        <th className="px-3 py-2"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {estimateItems.map((item, idx) => (
-                        <tr key={item.id || idx}>
-                          <td className="px-3 py-2 capitalize">{item.item_type}</td>
-                          <td className="px-3 py-2">{item.name}</td>
-                          <td className="px-3 py-2 text-right">{item.quantity}</td>
-                          <td className="px-3 py-2 text-right">{formatCurrency(item.unit_price)}</td>
-                          <td className="px-3 py-2 text-right font-medium">{formatCurrency(item.line_total)}</td>
-                          <td className="px-3 py-2">
-                            <button type="button" onClick={() => removeItem(idx)} className="p-1 hover:bg-red-50 rounded">
-                              <HiTrash className="w-4 h-4 text-red-500" />
-                            </button>
-                          </td>
-                        </tr>
+            {/* Modal Body - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <form onSubmit={handleSaveEstimate} className="space-y-4">
+                {/* Customer & Vehicle Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="relative space-y-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Customer</label>
+                    <select
+                      value={estimateForm.customer_id}
+                      onChange={(e) => handleCustomerChange(e.target.value)}
+                      className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
+                      required
+                    >
+                      <option value="">Select customer...</option>
+                      {customers.map(c => (
+                        <option key={c.id} value={c.id}>{c.full_name} {c.phone ? `(${c.phone})` : ''}</option>
                       ))}
-                      {estimateItems.length === 0 && (
-                        <tr><td colSpan={6} className="px-3 py-4 text-center text-gray-500">No items added</td></tr>
-                      )}
-                    </tbody>
-                  </table>
+                    </select>
+                    <HiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400" />
+                  </div>
+                  <div className="relative space-y-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle</label>
+                    <select
+                      value={estimateForm.vehicle_id}
+                      onChange={(e) => handleVehicleChange(e.target.value)}
+                      className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
+                    >
+                      <option value="">Select or enter manually...</option>
+                      {customerVehicles.map(v => (
+                        <option key={v.id} value={v.id}>{v.year} {v.make} {v.model} ({v.license_plate || v.vin || 'No plate'})</option>
+                      ))}
+                    </select>
+                    <HiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400" />
+                  </div>
                 </div>
 
-                {/* Add Item Form */}
-                {showAddItem && (
-                  <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      <select value={newItem.item_type} onChange={(e) => setNewItem(n => ({ ...n, item_type: e.target.value }))} className="border border-gray-300 rounded-lg px-3 py-2">
-                        {ITEM_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                {/* Vehicle Details */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Make</label>
+                    <input type="text" value={estimateForm.vehicle_make} onChange={(e) => setEstimateForm(f => ({ ...f, vehicle_make: e.target.value }))} className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Model</label>
+                    <input type="text" value={estimateForm.vehicle_model} onChange={(e) => setEstimateForm(f => ({ ...f, vehicle_model: e.target.value }))} className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                    <input type="number" value={estimateForm.vehicle_year} onChange={(e) => setEstimateForm(f => ({ ...f, vehicle_year: e.target.value }))} className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">VIN</label>
+                    <input type="text" value={estimateForm.vehicle_vin} onChange={(e) => setEstimateForm(f => ({ ...f, vehicle_vin: e.target.value }))} className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">License Plate</label>
+                    <input type="text" value={estimateForm.vehicle_license_plate} onChange={(e) => setEstimateForm(f => ({ ...f, vehicle_license_plate: e.target.value }))} className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Mileage</label>
+                    <input type="number" value={estimateForm.vehicle_mileage} onChange={(e) => setEstimateForm(f => ({ ...f, vehicle_mileage: e.target.value }))} className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
+                  </div>
+                </div>
+
+                {/* Customer Concern */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Customer Concern
+                  </label>
+                  <textarea value={estimateForm.customer_concern} onChange={(e) => setEstimateForm(f => ({ ...f, customer_concern: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900 resize-none" rows={2} />
+                </div>
+
+                {/* Line Items */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">Line Items</h4>
+                    <div className="flex space-x-2">
+                      <select onChange={(e) => { if (e.target.value) addPackageToEstimate(packages.find(p => p.id === e.target.value)); e.target.value = ''; }} className="appearance-none border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
+                        <option value="">Add Package...</option>
+                        {packages.map(p => (<option key={p.id} value={p.id}>{p.name} ({formatCurrency(p.base_price)})</option>))}
                       </select>
-                      <input type="text" placeholder="Name" value={newItem.name} onChange={(e) => setNewItem(n => ({ ...n, name: e.target.value }))} className="border border-gray-300 rounded-lg px-3 py-2 col-span-2" />
-                      <input type="number" placeholder="Qty" value={newItem.quantity} onChange={(e) => setNewItem(n => ({ ...n, quantity: e.target.value }))} className="border border-gray-300 rounded-lg px-3 py-2" />
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      <input type="number" step="0.01" placeholder="Unit Price" value={newItem.unit_price} onChange={(e) => setNewItem(n => ({ ...n, unit_price: e.target.value }))} className="border border-gray-300 rounded-lg px-3 py-2" />
-                      {newItem.item_type === 'labor' && (
-                        <>
-                          <input type="number" step="0.5" placeholder="Hours" value={newItem.estimated_hours} onChange={(e) => setNewItem(n => ({ ...n, estimated_hours: e.target.value }))} className="border border-gray-300 rounded-lg px-3 py-2" />
-                          <select value={newItem.hourly_rate} onChange={(e) => setNewItem(n => ({ ...n, hourly_rate: e.target.value, unit_price: e.target.value }))} className="border border-gray-300 rounded-lg px-3 py-2">
-                            <option value="">Select rate...</option>
-                            {laborRates.map(r => <option key={r.id} value={r.hourly_rate}>{r.name} ({formatCurrency(r.hourly_rate)}/hr)</option>)}
-                          </select>
-                        </>
-                      )}
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                      <button type="button" onClick={() => setShowAddItem(false)} className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-                      <button type="button" onClick={handleAddItem} className="px-3 py-1.5 bg-black text-white rounded-lg hover:bg-gray-800">Add</button>
+                      <button type="button" onClick={() => setShowAddItem(true)} className="flex items-center space-x-1 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-sm">
+                        <HiPlus className="w-4 h-4" /><span>Add Item</span>
+                      </button>
                     </div>
                   </div>
-                )}
 
-                {/* Totals */}
-                <div className="flex justify-end">
-                  <div className="w-64 space-y-2 text-sm">
-                    <div className="flex justify-between"><span>Labor:</span><span>{formatCurrency(currentTotals.laborTotal)}</span></div>
-                    <div className="flex justify-between"><span>Parts & Fees:</span><span>{formatCurrency(currentTotals.partsTotal)}</span></div>
-                    {currentTotals.discountTotal > 0 && <div className="flex justify-between text-red-600"><span>Discount:</span><span>-{formatCurrency(currentTotals.discountTotal)}</span></div>}
-                    <div className="flex justify-between border-t pt-2"><span>Subtotal:</span><span>{formatCurrency(currentTotals.subtotal)}</span></div>
-                    <div className="flex justify-between items-center">
-                      <span>Tax Rate:</span>
-                      <input type="number" step="0.01" value={estimateForm.tax_rate} onChange={(e) => setEstimateForm(f => ({ ...f, tax_rate: e.target.value }))} className="w-20 border border-gray-300 rounded px-2 py-1 text-right" />
+                  {/* Items Table */}
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-3 py-2 text-left">Type</th>
+                          <th className="px-3 py-2 text-left">Description</th>
+                          <th className="px-3 py-2 text-right">Qty</th>
+                          <th className="px-3 py-2 text-right">Unit Price</th>
+                          <th className="px-3 py-2 text-right">Total</th>
+                          <th className="px-3 py-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {estimateItems.map((item, idx) => (
+                          <tr key={item.id || idx}>
+                            <td className="px-3 py-2 capitalize">{item.item_type}</td>
+                            <td className="px-3 py-2">{item.name}</td>
+                            <td className="px-3 py-2 text-right">{item.quantity}</td>
+                            <td className="px-3 py-2 text-right">{formatCurrency(item.unit_price)}</td>
+                            <td className="px-3 py-2 text-right font-medium">{formatCurrency(item.line_total)}</td>
+                            <td className="px-3 py-2">
+                              <button type="button" onClick={() => removeItem(idx)} className="p-1 hover:bg-red-50 rounded">
+                                <HiTrash className="w-4 h-4 text-red-500" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        {estimateItems.length === 0 && (
+                          <tr><td colSpan={6} className="px-3 py-4 text-center text-gray-500">No items added</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Add Item Form */}
+                  {showAddItem && (
+                    <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <select value={newItem.item_type} onChange={(e) => setNewItem(n => ({ ...n, item_type: e.target.value }))} className="border border-gray-300 rounded-lg px-3 py-2">
+                          {ITEM_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                        </select>
+                        <input type="text" placeholder="Name" value={newItem.name} onChange={(e) => setNewItem(n => ({ ...n, name: e.target.value }))} className="border border-gray-300 rounded-lg px-3 py-2 col-span-2" />
+                        <input type="number" placeholder="Qty" value={newItem.quantity} onChange={(e) => setNewItem(n => ({ ...n, quantity: e.target.value }))} className="border border-gray-300 rounded-lg px-3 py-2" />
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <input type="number" step="0.01" placeholder="Unit Price" value={newItem.unit_price} onChange={(e) => setNewItem(n => ({ ...n, unit_price: e.target.value }))} className="border border-gray-300 rounded-lg px-3 py-2" />
+                        {newItem.item_type === 'labor' && (
+                          <>
+                            <input type="number" step="0.5" placeholder="Hours" value={newItem.estimated_hours} onChange={(e) => setNewItem(n => ({ ...n, estimated_hours: e.target.value }))} className="border border-gray-300 rounded-lg px-3 py-2" />
+                            <select value={newItem.hourly_rate} onChange={(e) => setNewItem(n => ({ ...n, hourly_rate: e.target.value, unit_price: e.target.value }))} className="border border-gray-300 rounded-lg px-3 py-2">
+                              <option value="">Select rate...</option>
+                              {laborRates.map(r => <option key={r.id} value={r.hourly_rate}>{r.name} ({formatCurrency(r.hourly_rate)}/hr)</option>)}
+                            </select>
+                          </>
+                        )}
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <button type="button" onClick={() => setShowAddItem(false)} className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+                        <button type="button" onClick={handleAddItem} className="px-3 py-1.5 bg-black text-white rounded-lg hover:bg-gray-800">Add</button>
+                      </div>
                     </div>
-                    <div className="flex justify-between"><span>Tax:</span><span>{formatCurrency(currentTotals.taxAmount)}</span></div>
-                    <div className="flex justify-between font-bold text-lg border-t pt-2"><span>Total:</span><span>{formatCurrency(currentTotals.total)}</span></div>
+                  )}
+
+                  {/* Valid Until and Totals side by side */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Valid Until
+                      </label>
+                      <input type="date" value={estimateForm.valid_until} onChange={(e) => setEstimateForm(f => ({ ...f, valid_until: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
+                    </div>
+
+                    {/* Totals */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between"><span className="text-sm">Labor:</span><span className="text-sm">{formatCurrency(currentTotals.laborTotal)}</span></div>
+                      <div className="flex justify-between"><span className="text-sm">Parts & Fees:</span><span className="text-sm">{formatCurrency(currentTotals.partsTotal)}</span></div>
+                      {currentTotals.discountTotal > 0 && <div className="flex justify-between text-red-600"><span className="text-sm">Discount:</span><span className="text-sm">-{formatCurrency(currentTotals.discountTotal)}</span></div>}
+                      <div className="flex justify-between border-t pt-2"><span className="text-sm">Subtotal:</span><span className="text-sm">{formatCurrency(currentTotals.subtotal)}</span></div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Tax Rate:</span>
+                        <input type="number" step="0.01" value={estimateForm.tax_rate} onChange={(e) => setEstimateForm(f => ({ ...f, tax_rate: e.target.value }))} className="w-20 border border-gray-300 rounded px-2 py-1 text-right text-sm" />
+                      </div>
+                      <div className="flex justify-between"><span className="text-sm">Tax:</span><span className="text-sm">{formatCurrency(currentTotals.taxAmount)}</span></div>
+                      <div className="flex justify-between font-bold text-lg border-t pt-2"><span>Total:</span><span>{formatCurrency(currentTotals.total)}</span></div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </form>
+            </div>
 
-              {/* Notes & Valid Until */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Internal Notes</label>
-                  <textarea value={estimateForm.internal_notes} onChange={(e) => setEstimateForm(f => ({ ...f, internal_notes: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" rows={2} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Valid Until</label>
-                  <input type="date" value={estimateForm.valid_until} onChange={(e) => setEstimateForm(f => ({ ...f, valid_until: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
-                </div>
-              </div>
-            </form>
-
-            <div className="flex justify-end space-x-3 p-6 border-t">
-              <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-              <button onClick={handleSaveEstimate} disabled={saving} className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50">
-                {saving ? 'Saving...' : (selectedEstimate ? 'Update Estimate' : 'Create Estimate')}
+            {/* Modal Footer */}
+            <div className="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium"
+              >
+                Cancel
+              </button>
+              <button onClick={handleSaveEstimate} disabled={saving} className="px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                {saving ? 'Saving...' : (selectedEstimate ? 'Save Changes' : 'Create Estimate')}
               </button>
             </div>
           </div>
@@ -883,21 +900,27 @@ const Estimates = () => {
 
       {/* Detail Modal */}
       {showDetailModal && detailEstimate && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 overflow-y-auto py-8">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl m-4">
-            <div className="flex items-center justify-between p-6 border-b">
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full mx-4 z-50">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <div>
-                <h3 className="text-xl font-semibold">{detailEstimate.estimate_number}</h3>
+                <h2 className="text-2xl font-bold text-black">{detailEstimate.estimate_number}</h2>
                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs mt-1 ${STATUS_CONFIG[detailEstimate.status]?.color}`}>
                   {STATUS_CONFIG[detailEstimate.status]?.label}
                 </span>
               </div>
-              <button onClick={() => setShowDetailModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <HiX className="w-5 h-5" />
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="text-gray-500 hover:text-gray-700 transition"
+              >
+                <HiX className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
+            {/* Modal Body */}
+            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
               {/* Customer & Vehicle */}
               <div className="grid grid-cols-2 gap-6">
                 <div>
@@ -987,8 +1010,8 @@ const Estimates = () => {
               )}
             </div>
 
-            {/* Actions */}
-            <div className="flex justify-end space-x-3 p-6 border-t">
+            {/* Modal Footer */}
+            <div className="pt-4 flex justify-end space-x-3 px-6 pb-6">
               {detailEstimate.status === 'pending' && user?.role !== 'service_advisor' && (
                 <>
                   <button
@@ -1014,16 +1037,49 @@ const Estimates = () => {
 
       {/* Delete Confirmation */}
       {showDeleteConfirm && selectedEstimate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 m-4">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="p-2 bg-red-100 rounded-full"><HiExclamation className="w-6 h-6 text-red-600" /></div>
-              <h3 className="text-lg font-semibold">Delete Estimate</h3>
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6 z-50">
+            {/* Modal Header */}
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold text-black">Delete Estimate</h2>
             </div>
-            <p className="text-gray-600 mb-6">Are you sure you want to delete {selectedEstimate.estimate_number}? This cannot be undone.</p>
-            <div className="flex justify-end space-x-3">
-              <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-              <button onClick={handleDelete} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Delete</button>
+
+            {/* Modal Body */}
+            <div className="mb-6">
+              <p className="text-gray-600 text-sm mb-4">
+                Are you sure you want to delete this estimate? This action cannot be undone.
+              </p>
+              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Estimate #:</span>{' '}
+                  {selectedEstimate.estimate_number || '-'}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Customer:</span>{' '}
+                  {selectedEstimate.customer?.full_name || '-'}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Total:</span>{' '}
+                  {formatCurrency(selectedEstimate.total_amount)}
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-medium"
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>

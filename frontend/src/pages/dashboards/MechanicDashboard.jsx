@@ -415,22 +415,28 @@ const MechanicDashboard = () => {
 
       {/* Clock In Modal */}
       {showClockInModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 m-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Clock In</h3>
-              <button onClick={() => setShowClockInModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <HiX className="w-5 h-5" />
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg z-50 flex flex-col">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between flex-shrink-0">
+              <h2 className="text-2xl font-bold text-black">Clock In</h2>
+              <button
+                onClick={() => setShowClockInModal(false)}
+                className="text-gray-500 hover:text-gray-700 transition"
+              >
+                <HiX className="w-6 h-6" />
               </button>
             </div>
 
-            <form onSubmit={handleClockIn} className="space-y-4">
+            {/* Modal Body */}
+            <form onSubmit={handleClockIn} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Job *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Job *</label>
                 <select
                   value={clockInForm.job_order_id}
                   onChange={(e) => setClockInForm({ ...clockInForm, job_order_id: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
                   required
                 >
                   <option value="">Select a job</option>
@@ -442,11 +448,11 @@ const MechanicDashboard = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Work Type</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Work Type</label>
                 <select
                   value={clockInForm.work_type}
                   onChange={(e) => setClockInForm({ ...clockInForm, work_type: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
                 >
                   <option value="repair">Repair</option>
                   <option value="diagnostic">Diagnostic</option>
@@ -456,20 +462,22 @@ const MechanicDashboard = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description (optional)</label>
                 <textarea
                   value={clockInForm.description}
                   onChange={(e) => setClockInForm({ ...clockInForm, description: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
                   rows={2}
                   placeholder="What will you be working on?"
                 />
               </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button type="button" onClick={() => setShowClockInModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+
+              {/* Modal Footer */}
+              <div className="pt-4 flex justify-end space-x-3">
+                <button type="button" onClick={() => setShowClockInModal(false)} className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium">
                   Cancel
                 </button>
-                <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                <button type="submit" className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-medium">
                   Start Timer
                 </button>
               </div>
@@ -480,60 +488,70 @@ const MechanicDashboard = () => {
 
       {/* Clock Out Modal */}
       {showClockOutModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 m-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Clock Out</h3>
-              <button onClick={() => setShowClockOutModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <HiX className="w-5 h-5" />
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg z-50 flex flex-col">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between flex-shrink-0">
+              <h2 className="text-2xl font-bold text-black">Clock Out</h2>
+              <button
+                onClick={() => setShowClockOutModal(false)}
+                className="text-gray-500 hover:text-gray-700 transition"
+              >
+                <HiX className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600">Time worked:</p>
-              <p className="text-3xl font-mono font-bold text-black">{formatDuration(elapsedTime)}</p>
-            </div>
+            {/* Modal Body */}
+            <div className="p-6">
+              <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600">Time worked:</p>
+                <p className="text-3xl font-mono font-bold text-black">{formatDuration(elapsedTime)}</p>
+              </div>
 
-            <form onSubmit={handleClockOut} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Break time (minutes)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={clockOutForm.break_minutes}
-                  onChange={(e) => setClockOutForm({ ...clockOutForm, break_minutes: parseInt(e.target.value) || 0 })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                />
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="task_completed"
-                  checked={clockOutForm.task_completed}
-                  onChange={(e) => setClockOutForm({ ...clockOutForm, task_completed: e.target.checked })}
-                  className="mr-2"
-                />
-                <label htmlFor="task_completed" className="text-sm font-medium text-gray-700">Task completed</label>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
-                <textarea
-                  value={clockOutForm.description}
-                  onChange={(e) => setClockOutForm({ ...clockOutForm, description: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  rows={2}
-                  placeholder="What did you accomplish?"
-                />
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button type="button" onClick={() => setShowClockOutModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                  Cancel
-                </button>
-                <button type="submit" className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                  Clock Out
-                </button>
-              </div>
-            </form>
+              <form onSubmit={handleClockOut} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Break time (minutes)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={clockOutForm.break_minutes}
+                    onChange={(e) => setClockOutForm({ ...clockOutForm, break_minutes: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
+                  />
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="task_completed"
+                    checked={clockOutForm.task_completed}
+                    onChange={(e) => setClockOutForm({ ...clockOutForm, task_completed: e.target.checked })}
+                    className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                  />
+                  <label htmlFor="task_completed" className="ml-2 text-sm text-gray-700">Task completed</label>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Notes (optional)</label>
+                  <textarea
+                    value={clockOutForm.description}
+                    onChange={(e) => setClockOutForm({ ...clockOutForm, description: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
+                    rows={2}
+                    placeholder="What did you accomplish?"
+                  />
+                </div>
+
+                {/* Modal Footer */}
+                <div className="pt-4 flex justify-end space-x-3">
+                  <button type="button" onClick={() => setShowClockOutModal(false)} className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium">
+                    Cancel
+                  </button>
+                  <button type="submit" className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-medium">
+                    Clock Out
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

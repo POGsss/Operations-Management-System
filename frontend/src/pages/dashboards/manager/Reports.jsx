@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import MetricCard from '../../../components/MetricCard';
+import { HiChip, HiCheckCircle, HiClock, HiChartBar, HiCurrencyDollar, HiDocument, HiCube, HiExclamationCircle, HiClipboardList, HiUserGroup } from 'react-icons/hi';
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -144,10 +145,10 @@ const Reports = () => {
           {activeReport === 'jobs' && reportData && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <MetricCard title="Total Jobs" value={reportData.total_jobs || 0} icon="🔧" />
-                <MetricCard title="Completed" value={reportData.completed_jobs || 0} icon="✅" />
-                <MetricCard title="In Progress" value={reportData.in_progress_jobs || 0} icon="⏳" />
-                <MetricCard title="Completion Rate" value={`${(reportData.completion_rate || 0).toFixed(1)}%`} icon="📈" />
+                <MetricCard title="Total Jobs" value={reportData.total_jobs || 0} icon={<HiChip className="w-6 h-6" />} />
+                <MetricCard title="Completed" value={reportData.completed_jobs || 0} icon={<HiCheckCircle className="w-6 h-6" />} />
+                <MetricCard title="In Progress" value={reportData.in_progress_jobs || 0} icon={<HiClock className="w-6 h-6" />} />
+                <MetricCard title="Completion Rate" value={`${(reportData.completion_rate || 0).toFixed(1)}%`} icon={<HiChartBar className="w-6 h-6" />} />
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -191,10 +192,10 @@ const Reports = () => {
           {activeReport === 'sales' && reportData && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <MetricCard title="Total Revenue" value={formatCurrency(reportData.total_revenue)} icon="💰" />
-                <MetricCard title="Total Invoices" value={reportData.total_invoices || 0} icon="📄" />
-                <MetricCard title="Paid Invoices" value={reportData.paid_invoices || 0} icon="✅" />
-                <MetricCard title="Avg Invoice" value={formatCurrency(reportData.avg_invoice_value)} icon="📊" />
+                <MetricCard title="Total Revenue" value={formatCurrency(reportData.total_revenue)} icon={<HiCurrencyDollar className="w-6 h-6" />} />
+                <MetricCard title="Total Invoices" value={reportData.total_invoices || 0} icon={<HiDocument className="w-6 h-6" />} />
+                <MetricCard title="Paid Invoices" value={reportData.paid_invoices || 0} icon={<HiCheckCircle className="w-6 h-6" />} />
+                <MetricCard title="Avg Invoice" value={formatCurrency(reportData.avg_invoice_value)} icon={<HiChartBar className="w-6 h-6" />} />
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -253,10 +254,10 @@ const Reports = () => {
           {activeReport === 'inventory' && reportData && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <MetricCard title="Total Items" value={reportData.total_items || 0} icon="📦" />
-                <MetricCard title="Total Value" value={formatCurrency(reportData.total_value)} icon="💵" />
-                <MetricCard title="Low Stock Items" value={reportData.low_stock_count || 0} icon="⚠️" />
-                <MetricCard title="Categories" value={reportData.categories?.length || 0} icon="📋" />
+                <MetricCard title="Total Items" value={reportData.total_items || 0} icon={<HiCube className="w-6 h-6" />} />
+                <MetricCard title="Total Value" value={formatCurrency(reportData.total_value)} icon={<HiCurrencyDollar className="w-6 h-6" />} />
+                <MetricCard title="Low Stock Items" value={reportData.low_stock_count || 0} icon={<HiExclamationCircle className="w-6 h-6" />} />
+                <MetricCard title="Categories" value={reportData.categories?.length || 0} icon={<HiClipboardList className="w-6 h-6" />} />
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -311,10 +312,10 @@ const Reports = () => {
           {activeReport === 'performance' && reportData && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <MetricCard title="Total Hours" value={`${(reportData.total_hours || 0).toFixed(1)}h`} icon="⏱️" />
-                <MetricCard title="Billable Hours" value={`${(reportData.billable_hours || 0).toFixed(1)}h`} icon="💵" />
-                <MetricCard title="Active Staff" value={reportData.active_mechanics || 0} icon="👷" />
-                <MetricCard title="Labor Revenue" value={formatCurrency(reportData.labor_revenue)} icon="💰" />
+                <MetricCard title="Total Hours" value={`${(reportData.total_hours || 0).toFixed(1)}h`} icon={<HiClock className="w-6 h-6" />} />
+                <MetricCard title="Billable Hours" value={`${(reportData.billable_hours || 0).toFixed(1)}h`} icon={<HiCurrencyDollar className="w-6 h-6" />} />
+                <MetricCard title="Active Staff" value={reportData.active_mechanics || 0} icon={<HiUserGroup className="w-6 h-6" />} />
+                <MetricCard title="Labor Revenue" value={formatCurrency(reportData.labor_revenue)} icon={<HiCurrencyDollar className="w-6 h-6" />} />
               </div>
 
               <div className="bg-white rounded-lg shadow p-6 border border-gray-200">

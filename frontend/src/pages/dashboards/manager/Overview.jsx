@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import MetricCard from '../../../components/MetricCard';
+import { HiChip, HiCheckCircle, HiClock, HiCurrencyDollar, HiCube, HiExclamationCircle, HiChartBar } from 'react-icons/hi';
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -84,22 +85,22 @@ const Overview = () => {
                 <MetricCard
                     title="Total Job Orders"
                     value={jobsSummary?.total_jobs || 0}
-                    icon="🔧"
+                    icon={<HiChip className="w-6 h-6" />}
                 />
                 <MetricCard
                     title="Completed Jobs"
                     value={jobsSummary?.completed_jobs || 0}
-                    icon="✅"
+                    icon={<HiCheckCircle className="w-6 h-6" />}
                 />
                 <MetricCard
                     title="In Progress"
                     value={jobsSummary?.in_progress_jobs || 0}
-                    icon="⏳"
+                    icon={<HiClock className="w-6 h-6" />}
                 />
                 <MetricCard
                     title="Monthly Revenue"
                     value={formatCurrency(salesSummary?.total_revenue)}
-                    icon="💰"
+                    icon={<HiCurrencyDollar className="w-6 h-6" />}
                 />
             </div>
 
@@ -108,22 +109,22 @@ const Overview = () => {
                 <MetricCard
                     title="Inventory Items"
                     value={overview?.total_items || 0}
-                    icon="📦"
+                    icon={<HiCube className="w-6 h-6" />}
                 />
                 <MetricCard
                     title="Low Stock Items"
                     value={overview?.low_stock_count || 0}
-                    icon="⚠️"
+                    icon={<HiExclamationCircle className="w-6 h-6" />}
                 />
                 <MetricCard
                     title="Inventory Value"
                     value={formatCurrency(overview?.total_value)}
-                    icon="💵"
+                    icon={<HiCurrencyDollar className="w-6 h-6" />}
                 />
                 <MetricCard
                     title="Completion Rate"
                     value={`${(jobsSummary?.completion_rate || 0).toFixed(1)}%`}
-                    icon="📈"
+                    icon={<HiChartBar className="w-6 h-6" />}
                 />
             </div>
 

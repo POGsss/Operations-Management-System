@@ -196,28 +196,31 @@ router.post('/login', async (req, res) => {
       .single();
 
     if (profileError || !userProfile) {
-      // Log failed login due to missing profile
-      console.log('User profile not found for ID:', userId);
-      
-      await supabaseAdmin
-        .from('audit_logs')
-        .insert([{
-          user_id: userId,
-          action: 'LOGIN',
-          entity_type: 'AUTHENTICATION',
-          entity_name: email,
-          details: {
-            email,
-            role,
-            attemptedAt: new Date().toISOString(),
-          },
-          status: 'FAILED',
-          error_message: 'User profile not found',
-          created_at: new Date().toISOString(),
-        }])
-        .select();
+      // For demo purposes, create a user profile if it doesn't exist
+      console.log('User profile not found, creating demo profile for:', userId, email);
 
-      return res.status(401).json({ error: 'User profile not found' });
+      const demoProfile = {
+        id: userId,
+        email,
+        full_name: email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        role: role || 'admin', // Use provided role or default to admin
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      const { data: newUser, error: createError } = await supabaseAdmin
+        .from('users')
+        .insert([demoProfile])
+        .select()
+        .single();
+
+      if (createError) {
+        console.error('Failed to create demo user profile:', createError.message);
+        return res.status(500).json({ error: 'Failed to create user profile' });
+      }
+
+      userProfile = newUser;
     }
 
     // Log successful login

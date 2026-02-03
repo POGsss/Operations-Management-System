@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import MetricCard from '../../../components/MetricCard';
+import { HiCurrencyDollar, HiDocument, HiCheckCircle, HiChartBar } from 'react-icons/hi';
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -105,24 +106,24 @@ const Sales = () => {
             <MetricCard
               title="Total Revenue"
               value={formatCurrency(salesSummary.total_revenue)}
-              icon="💰"
+              icon={<HiCurrencyDollar className="w-6 h-6" />}
               trend={salesSummary.revenue_change > 0 ? 'up' : 'down'}
               trendValue={`${Math.abs(salesSummary.revenue_change || 0).toFixed(1)}% vs last period`}
             />
             <MetricCard
               title="Total Invoices"
               value={salesSummary.total_invoices || 0}
-              icon="📄"
+              icon={<HiDocument className="w-6 h-6" />}
             />
             <MetricCard
               title="Paid Invoices"
               value={salesSummary.paid_invoices || 0}
-              icon="✅"
+              icon={<HiCheckCircle className="w-6 h-6" />}
             />
             <MetricCard
               title="Collection Rate"
               value={formatPercent((salesSummary.paid_invoices / salesSummary.total_invoices) * 100)}
-              icon="📊"
+              icon={<HiChartBar className="w-6 h-6" />}
             />
           </div>
 

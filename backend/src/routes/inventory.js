@@ -37,7 +37,7 @@ router.get('/stock', authenticateToken, async (req, res) => {
       .from('inventory_stock')
       .select(`
         *,
-        item:inventory_items(id, name, sku, category, unit_of_measure),
+        item:inventory_items(id, name, sku, category),
         branch:branches(id, name, code),
         updater:users!inventory_stock_last_updated_by_fkey(id, full_name)
       `)
@@ -85,7 +85,7 @@ router.get('/stock/:id', authenticateToken, async (req, res) => {
       .from('inventory_stock')
       .select(`
         *,
-        item:inventory_items(id, name, sku, category, unit_of_measure),
+        item:inventory_items(id, name, sku, category),
         branch:branches(id, name, code),
         updater:users!inventory_stock_last_updated_by_fkey(id, full_name)
       `)

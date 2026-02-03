@@ -7,7 +7,6 @@ import {
   HiX,
   HiClock,
   HiTrendingUp,
-  HiUsers,
   HiChartBar,
   HiAcademicCap,
   HiRefresh,
@@ -653,155 +652,179 @@ const Performance = () => {
 
       {/* Goal Modal */}
       {showGoalModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 m-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">{editingGoal ? 'Edit Goal' : 'Set Performance Goal'}</h3>
-              <button onClick={() => setShowGoalModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <HiX className="w-5 h-5" />
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] z-50 flex flex-col">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between flex-shrink-0">
+              <h2 className="text-2xl font-bold text-black">{editingGoal ? 'Edit Goal' : 'Set Performance Goal'}</h2>
+              <button
+                onClick={() => setShowGoalModal(false)}
+                className="text-gray-500 hover:text-gray-700 transition"
+              >
+                <HiX className="w-6 h-6" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveGoal} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mechanic *</label>
-                <select
-                  value={goalForm.user_id}
-                  onChange={(e) => setGoalForm(f => ({ ...f, user_id: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  required
-                >
-                  <option value="">Select mechanic</option>
-                  {leaderboard.map(m => (
-                    <option key={m.mechanic_id} value={m.mechanic_id}>{m.mechanic_name}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+            {/* Modal Body - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <form onSubmit={handleSaveGoal} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
-                  <input type="date" value={goalForm.start_date} onChange={(e) => setGoalForm(f => ({ ...f, start_date: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Mechanic *</label>
+                  <select
+                    value={goalForm.user_id}
+                    onChange={(e) => setGoalForm(f => ({ ...f, user_id: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
+                    required
+                  >
+                    <option value="">Select mechanic</option>
+                    {leaderboard.map(m => (
+                      <option key={m.mechanic_id} value={m.mechanic_id}>{m.mechanic_name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Start Date *</label>
+                    <input type="date" value={goalForm.start_date} onChange={(e) => setGoalForm(f => ({ ...f, start_date: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">End Date *</label>
+                    <input type="date" value={goalForm.end_date} onChange={(e) => setGoalForm(f => ({ ...f, end_date: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" required />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Hours Target</label>
+                    <input type="number" step="0.5" value={goalForm.hours_target} onChange={(e) => setGoalForm(f => ({ ...f, hours_target: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Jobs Target</label>
+                    <input type="number" value={goalForm.jobs_target} onChange={(e) => setGoalForm(f => ({ ...f, jobs_target: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Revenue Target ($)</label>
+                    <input type="number" step="0.01" value={goalForm.revenue_target} onChange={(e) => setGoalForm(f => ({ ...f, revenue_target: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Efficiency Target (%)</label>
+                    <input type="number" step="0.1" max="100" value={goalForm.efficiency_target} onChange={(e) => setGoalForm(f => ({ ...f, efficiency_target: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">End Date *</label>
-                  <input type="date" value={goalForm.end_date} onChange={(e) => setGoalForm(f => ({ ...f, end_date: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                  <textarea value={goalForm.notes} onChange={(e) => setGoalForm(f => ({ ...f, notes: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" rows={2} />
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Hours Target</label>
-                  <input type="number" step="0.5" value={goalForm.hours_target} onChange={(e) => setGoalForm(f => ({ ...f, hours_target: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+
+                {/* Modal Footer */}
+                <div className="pt-4 flex justify-end space-x-3">
+                  <button type="button" onClick={() => setShowGoalModal(false)} className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium">
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={saving} className="px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                    {saving ? 'Saving...' : (editingGoal ? 'Update' : 'Create Goal')}
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Jobs Target</label>
-                  <input type="number" value={goalForm.jobs_target} onChange={(e) => setGoalForm(f => ({ ...f, jobs_target: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Revenue Target ($)</label>
-                  <input type="number" step="0.01" value={goalForm.revenue_target} onChange={(e) => setGoalForm(f => ({ ...f, revenue_target: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Efficiency Target (%)</label>
-                  <input type="number" step="0.1" max="100" value={goalForm.efficiency_target} onChange={(e) => setGoalForm(f => ({ ...f, efficiency_target: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                <textarea value={goalForm.notes} onChange={(e) => setGoalForm(f => ({ ...f, notes: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" rows={2} />
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button type="button" onClick={() => setShowGoalModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-                <button type="submit" disabled={saving} className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50">
-                  {saving ? 'Saving...' : (editingGoal ? 'Update' : 'Create Goal')}
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Skill Modal */}
       {showSkillModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 m-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">{editingSkill ? 'Edit Skill' : 'Add Skill'}</h3>
-              <button onClick={() => setShowSkillModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <HiX className="w-5 h-5" />
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] z-50 flex flex-col">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between flex-shrink-0">
+              <h2 className="text-2xl font-bold text-black">{editingSkill ? 'Edit Skill' : 'Add Skill'}</h2>
+              <button
+                onClick={() => setShowSkillModal(false)}
+                className="text-gray-500 hover:text-gray-700 transition"
+              >
+                <HiX className="w-6 h-6" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveSkill} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mechanic *</label>
-                <select
-                  value={skillForm.user_id}
-                  onChange={(e) => setSkillForm(f => ({ ...f, user_id: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  required
-                >
-                  <option value="">Select mechanic</option>
-                  {leaderboard.map(m => (
-                    <option key={m.mechanic_id} value={m.mechanic_id}>{m.mechanic_name}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Skill Name *</label>
-                <input type="text" value={skillForm.skill_name} onChange={(e) => setSkillForm(f => ({ ...f, skill_name: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" required />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+            {/* Modal Body - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <form onSubmit={handleSaveSkill} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                  <select value={skillForm.skill_category} onChange={(e) => setSkillForm(f => ({ ...f, skill_category: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2">
-                    <option value="">Select category</option>
-                    <option value="engine">Engine</option>
-                    <option value="transmission">Transmission</option>
-                    <option value="electrical">Electrical</option>
-                    <option value="brakes">Brakes</option>
-                    <option value="suspension">Suspension</option>
-                    <option value="hvac">HVAC</option>
-                    <option value="diagnostics">Diagnostics</option>
-                    <option value="body">Body Work</option>
-                    <option value="other">Other</option>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Mechanic *</label>
+                  <select
+                    value={skillForm.user_id}
+                    onChange={(e) => setSkillForm(f => ({ ...f, user_id: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900"
+                    required
+                  >
+                    <option value="">Select mechanic</option>
+                    {leaderboard.map(m => (
+                      <option key={m.mechanic_id} value={m.mechanic_id}>{m.mechanic_name}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Proficiency (1-5)</label>
-                  <input type="number" min="1" max="5" value={skillForm.proficiency_level} onChange={(e) => setSkillForm(f => ({ ...f, proficiency_level: parseInt(e.target.value) }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Skill Name *</label>
+                  <input type="text" value={skillForm.skill_name} onChange={(e) => setSkillForm(f => ({ ...f, skill_name: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" required />
                 </div>
-              </div>
-              <div className="flex items-center">
-                <input type="checkbox" id="certified" checked={skillForm.certified} onChange={(e) => setSkillForm(f => ({ ...f, certified: e.target.checked }))} className="mr-2" />
-                <label htmlFor="certified" className="text-sm font-medium text-gray-700">Certified</label>
-              </div>
-              {skillForm.certified && (
-                <>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Certification Number</label>
-                    <input type="text" value={skillForm.certification_number} onChange={(e) => setSkillForm(f => ({ ...f, certification_number: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                    <select value={skillForm.skill_category} onChange={(e) => setSkillForm(f => ({ ...f, skill_category: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900">
+                      <option value="">Select category</option>
+                      <option value="engine">Engine</option>
+                      <option value="transmission">Transmission</option>
+                      <option value="electrical">Electrical</option>
+                      <option value="brakes">Brakes</option>
+                      <option value="suspension">Suspension</option>
+                      <option value="hvac">HVAC</option>
+                      <option value="diagnostics">Diagnostics</option>
+                      <option value="body">Body Work</option>
+                      <option value="other">Other</option>
+                    </select>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Cert Date</label>
-                      <input type="date" value={skillForm.certification_date} onChange={(e) => setSkillForm(f => ({ ...f, certification_date: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
-                      <input type="date" value={skillForm.expiry_date} onChange={(e) => setSkillForm(f => ({ ...f, expiry_date: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Proficiency (1-5)</label>
+                    <input type="number" min="1" max="5" value={skillForm.proficiency_level} onChange={(e) => setSkillForm(f => ({ ...f, proficiency_level: parseInt(e.target.value) }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
                   </div>
-                </>
-              )}
-              <div className="flex justify-end space-x-3 pt-4">
-                <button type="button" onClick={() => setShowSkillModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-                <button type="submit" disabled={saving} className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50">
-                  {saving ? 'Saving...' : (editingSkill ? 'Update' : 'Add Skill')}
-                </button>
-              </div>
-            </form>
+                </div>
+                <div className="flex items-center">
+                  <input type="checkbox" id="certified" checked={skillForm.certified} onChange={(e) => setSkillForm(f => ({ ...f, certified: e.target.checked }))} className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black" />
+                  <label htmlFor="certified" className="ml-2 text-sm text-gray-700">Certified</label>
+                </div>
+                {skillForm.certified && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Certification Number</label>
+                      <input type="text" value={skillForm.certification_number} onChange={(e) => setSkillForm(f => ({ ...f, certification_number: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Cert Date</label>
+                        <input type="date" value={skillForm.certification_date} onChange={(e) => setSkillForm(f => ({ ...f, certification_date: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
+                        <input type="date" value={skillForm.expiry_date} onChange={(e) => setSkillForm(f => ({ ...f, expiry_date: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition bg-white text-gray-900" />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Modal Footer */}
+                <div className="pt-4 flex justify-end space-x-3">
+                  <button type="button" onClick={() => setShowSkillModal(false)} className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-lg transition font-medium">
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={saving} className="px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                    {saving ? 'Saving...' : (editingSkill ? 'Update' : 'Add Skill')}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

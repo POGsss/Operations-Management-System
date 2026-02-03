@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import MetricCard from '../../../components/MetricCard';
+import { HiUsers, HiDocumentText, HiChip, HiCurrencyDollar, HiClipboardList, HiCheckCircle, HiDocument, HiClock } from 'react-icons/hi';
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -107,22 +108,22 @@ const Overview = () => {
         <MetricCard
           title="Total Customers"
           value={stats.customers}
-          icon="👥"
+          icon={<HiUsers className="w-6 h-6" />}
         />
         <MetricCard
           title="Active Estimates"
           value={stats.estimates.pending}
-          icon="📝"
+          icon={<HiDocumentText className="w-6 h-6" />}
         />
         <MetricCard
           title="Jobs In Progress"
           value={stats.jobs.inProgress}
-          icon="🔧"
+          icon={<HiChip className="w-6 h-6" />}
         />
         <MetricCard
           title="Revenue (Paid)"
           value={formatCurrency(stats.invoices.revenue)}
-          icon="💰"
+          icon={<HiCurrencyDollar className="w-6 h-6" />}
         />
       </div>
 
@@ -131,22 +132,22 @@ const Overview = () => {
         <MetricCard
           title="Total Estimates"
           value={stats.estimates.total}
-          icon="📋"
+          icon={<HiClipboardList className="w-6 h-6" />}
         />
         <MetricCard
           title="Approved Estimates"
           value={stats.estimates.approved}
-          icon="✅"
+          icon={<HiCheckCircle className="w-6 h-6" />}
         />
         <MetricCard
           title="Total Invoices"
           value={stats.invoices.total}
-          icon="📄"
+          icon={<HiDocument className="w-6 h-6" />}
         />
         <MetricCard
           title="Pending Invoices"
           value={stats.invoices.pending}
-          icon="⏳"
+          icon={<HiClock className="w-6 h-6" />}
         />
       </div>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import MetricCard from '../../../components/MetricCard';
+import { HiOfficeBuilding, HiChip, HiCheckCircle, HiCurrencyDollar, HiCube, HiExclamationCircle, HiClock } from 'react-icons/hi';
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -123,22 +124,22 @@ const Overview = () => {
         <MetricCard
           title="Active Branches"
           value={stats.branches}
-          icon="🏢"
+          icon={<HiOfficeBuilding className="w-6 h-6" />}
         />
         <MetricCard
           title="Total Jobs (30d)"
           value={formatNumber(stats.jobs.total)}
-          icon="🔧"
+          icon={<HiChip className="w-6 h-6" />}
         />
         <MetricCard
           title="Completed Jobs"
           value={formatNumber(stats.jobs.completed)}
-          icon="✅"
+          icon={<HiCheckCircle className="w-6 h-6" />}
         />
         <MetricCard
           title="Monthly Revenue"
           value={formatCurrency(stats.revenue.total)}
-          icon="💰"
+          icon={<HiCurrencyDollar className="w-6 h-6" />}
         />
       </div>
 
@@ -147,22 +148,22 @@ const Overview = () => {
         <MetricCard
           title="Inventory Items"
           value={formatNumber(stats.inventory.items)}
-          icon="📦"
+          icon={<HiCube className="w-6 h-6" />}
         />
         <MetricCard
           title="Inventory Value"
           value={formatCurrency(stats.inventory.value)}
-          icon="💵"
+          icon={<HiCurrencyDollar className="w-6 h-6" />}
         />
         <MetricCard
           title="Low Stock Alerts"
           value={stats.inventory.lowStock}
-          icon="⚠️"
+          icon={<HiExclamationCircle className="w-6 h-6" />}
         />
         <MetricCard
           title="Jobs In Progress"
           value={formatNumber(stats.jobs.inProgress)}
-          icon="⏳"
+          icon={<HiClock className="w-6 h-6" />}
         />
       </div>
 
